@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#00a344">
+<title>RecargaBus — Simulação</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --p:#00a344;--p-dark:#007c33;--p-soft:#e2f6ea;
+  --bg:#eef2f0;--card:#ffffff;--txt:#12241b;--muted:#6d7d75;
+  --line:#dde5e1;--danger:#d64545;--radius:18px;
+  --shadow:0 10px 30px rgba(9,50,28,.10);
+}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--txt);overflow-x:hidden;
+}
+#phone{width:100%;min-height:100vh;display:flex;flex-direction:column;position:relative;background:var(--bg)}
+.screen{display:none;animation:fade .28s ease}
+.screen.active{display:flex;flex-direction:column;flex:1}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.hidden{display:none!important}
+
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit}
+
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:15px 20px;border-radius:14px;font-size:16px;font-weight:700;
+  background:var(--p);color:#fff;transition:.2s;letter-spacing:.2px;
+}
+.btn:hover{background:var(--p-dark)}
+.btn:disabled{background:#b7c4bd;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--p);border:1.5px solid var(--p)}
+.btn.ghost:hover{background:var(--p-soft)}
+.btn.small{width:auto;padding:10px 16px;font-size:14px;border-radius:11px}
+
+.field{margin-bottom:14px;text-align:left}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.field input{
+  width:100%;padding:14px 15px;border-radius:12px;border:1.5px solid #dbe3de;
+  background:#fff;font-size:16px;color:var(--txt);outline:none;transition:.2s;
+}
+.field input:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--p-soft)}
+.field input::placeholder{color:#aab6af}
+
+.login-wrap{
+  flex:1;display:flex;flex-direction:column;
+  background:linear-gradient(160deg,#007c33 0%,#00a344 45%,#23b95d 100%);
+}
+.brand-pane{padding:46px 30px 24px;color:#fff;text-align:center}
+.brand-pane h1{font-size:32px;font-weight:800;letter-spacing:-.5px;margin-top:0}
+.brand-pane .tagline{font-size:15px;opacity:.9;margin-top:4px}
+.logo-badge{
+  width:86px;height:86px;margin:0 auto 16px;border-radius:26px;
+  background:rgba(255,255,255,.16);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.35);
+}
+.feat{display:none}
+.login-side{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:6px 22px calc(30px + env(safe-area-inset-bottom));
+}
+.login-card{
+  background:#fff;border-radius:22px;padding:26px 22px;box-shadow:var(--shadow);
+  width:100%;max-width:420px;
+}
+.login-card h2{font-size:19px;margin-bottom:4px}
+.login-card .hint-sub{font-size:13.5px;color:var(--muted);margin-bottom:18px}
+.sim-note{
+  text-align:center;font-size:12px;color:rgba(255,255,255,.88);margin-top:18px;line-height:1.6;max-width:460px;
+}
+.sim-note b{color:#fff}
+.error-msg{
+  display:none;background:#fdecec;color:#b23030;border:1px solid #f5c6c6;
+  border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:14px;
+}
+.error-msg.show{display:block;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+#shell{display:flex;flex-direction:column;width:100%;min-height:100vh}
+#main-col{flex:1;min-width:0;display:flex;flex-direction:column}
+#sidebar{display:none}
+
+.appbar{
+  width:100%;max-width:1160px;margin:0 auto;
+  padding:34px 36px 4px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+}
+.appbar h2{font-size:27px;font-weight:800;letter-spacing:-.4px}
+.appbar p{font-size:14px;color:var(--muted);margin-top:3px}
+.appbar .right{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.avatar{
+  width:42px;height:42px;border-radius:50%;background:var(--p);color:#fff;
+  border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-weight:800;font-size:17px;text-transform:uppercase;
+}
+.tag-sim{
+  font-size:10.5px;font-weight:700;letter-spacing:1px;padding:5px 10px;border-radius:99px;
+  background:var(--p-soft);border:1px solid #bfe6cf;color:var(--p-dark);white-space:nowrap;
+}
+.content{width:100%;max-width:1160px;margin:0 auto;padding:20px 36px 64px;flex:1}
+
+.grid-home{display:grid;grid-template-columns:minmax(320px,400px) 1fr;gap:28px;align-items:start}
+.col-a,.col-b{display:flex;flex-direction:column;min-width:0}
+
+.saldo-card{
+  background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:22px 22px;display:flex;justify-content:space-between;align-items:center;margin-bottom:0;
+}
+.saldo-card .lbl{font-size:13px;color:var(--muted);font-weight:600}
+.saldo-card .val{font-size:38px;font-weight:800;color:var(--p-dark);line-height:1.1}
+.saldo-card .val small{font-size:15px;color:var(--muted);font-weight:600}
+.section-title{
+  display:flex;justify-content:space-between;align-items:center;
+  margin:2px 2px 12px;font-size:16px;font-weight:800;
+}
+.card-item{
+  background:#fff;border-radius:var(--radius);padding:16px 18px;margin-bottom:11px;
+  box-shadow:0 4px 14px rgba(9,50,28,.06);display:flex;justify-content:space-between;align-items:center;
+}
+.card-item .code{font-weight:800;font-size:15.5px;letter-spacing:.5px}
+.card-item .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.units-pill{
+  background:var(--p-soft);color:var(--p-dark);font-weight:800;font-size:14px;
+  padding:8px 14px;border-radius:12px;white-space:nowrap;
+}
+.empty-state{
+  text-align:center;background:#fff;border-radius:var(--radius);
+  padding:40px 22px;color:var(--muted);box-shadow:0 4px 14px rgba(9,50,28,.05);
+}
+.empty-state svg{margin-bottom:10px;opacity:.55}
+.empty-state b{color:var(--txt)}
+
+.actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.action-tile{
+  background:#fff;border-radius:var(--radius);padding:18px 15px;box-shadow:0 4px 14px rgba(9,50,28,.06);
+  display:flex;flex-direction:column;gap:10px;text-align:left;transition:.15s;border:1.5px solid transparent;
+}
+.action-tile:hover{transform:translateY(-2px);border-color:var(--p)}
+.action-tile .ic{
+  width:40px;height:40px;border-radius:12px;background:var(--p-soft);
+  display:flex;align-items:center;justify-content:center;color:var(--p-dark);
+}
+.action-tile b{font-size:14.5px}
+.action-tile span{font-size:12px;color:var(--muted);margin-top:-6px}
+
+.steps{display:flex;align-items:center;gap:6px;margin:14px 2px 8px}
+.step-dot{height:5px;flex:1;border-radius:99px;background:#cfdbd4;transition:.3s}
+.step-dot.on{background:var(--p)}
+.back-link{
+  display:inline-flex;align-items:center;gap:6px;color:var(--p-dark);
+  font-weight:700;font-size:14px;margin:12px 2px 0;background:none;
+}
+.panel{background:#fff;border-radius:var(--radius);box-shadow:0 4px 14px rgba(9,50,28,.06);padding:22px}
+.panel h3{font-size:18px;margin-bottom:4px}
+.panel .desc{font-size:13.5px;color:var(--muted);margin-bottom:16px}
+
+.code-input{
+  width:100%;padding:16px;border-radius:14px;border:1.5px solid #dbe3de;font-size:22px;
+  text-align:center;letter-spacing:3px;font-weight:700;outline:none;
+}
+.code-input:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--p-soft)}
+.link-btn{
+  color:var(--p);font-weight:700;font-size:13.5px;margin-top:12px;text-decoration:underline;
+}
+
+.qty-row{display:flex;align-items:center;justify-content:center;gap:22px;margin:8px 0 4px}
+.qty-btn{
+  width:52px;height:52px;border-radius:16px;background:var(--p-soft);color:var(--p-dark);
+  font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center;user-select:none;
+}
+.qty-btn:active{transform:scale(.93)}
+.qty-val{font-size:44px;font-weight:800;min-width:80px;text-align:center}
+.chips{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.chip{
+  padding:9px 16px;border-radius:99px;border:1.5px solid #dbe3de;background:#fff;
+  font-weight:700;font-size:14px;color:var(--muted);transition:.15s;
+}
+.chip.sel{background:var(--p);border-color:var(--p);color:#fff}
+.summary{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--p-soft);border-radius:14px;padding:14px 16px;margin:18px 0 14px;
+}
+.summary .l{font-size:13.5px;color:var(--p-dark);font-weight:600}
+.summary .r{font-size:22px;font-weight:800;color:var(--p-dark)}
+
+.pay-opt{
+  width:100%;display:flex;align-items:center;gap:14px;background:#fff;
+  border:2px solid #e3eae6;border-radius:16px;padding:16px;margin-bottom:12px;text-align:left;transition:.15s;
+}
+.pay-opt:hover{border-color:var(--p)}
+.pay-opt .ic{
+  width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
+}
+.pay-opt.pix .ic{background:#00a38a}.pay-opt.cred .ic{background:#3b5bdb}
+.pay-opt b{font-size:15.5px;display:block}
+.pay-opt span{font-size:12.5px;color:var(--muted)}
+.pay-opt .arrow{margin-left:auto;color:#b6c2bb}
+
+.overlay{
+  position:fixed;inset:0;background:rgba(8,25,16,.55);z-index:50;
+  display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(2px);
+}
+.overlay.show{display:flex;animation:fade .2s}
+.sheet{
+  width:100%;max-width:480px;max-height:92vh;overflow-y:auto;background:#fff;border-radius:22px;
+  padding:24px;animation:pop .25s ease;
+}
+@keyframes pop{from{transform:translateY(14px) scale(.97);opacity:.4}to{transform:none;opacity:1}}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.sheet-head h3{font-size:18px}
+.close-x{
+  width:34px;height:34px;border-radius:50%;background:#eef2f0;color:var(--muted);
+  font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;
+}
+.amount-big{text-align:center;font-size:36px;font-weight:800;color:var(--p-dark);margin:6px 0 16px}
+.qr-box{
+  width:232px;height:232px;margin:0 auto 14px;padding:10px;background:#fff;
+  border:2px dashed #cbd7d0;border-radius:18px;display:flex;align-items:center;justify-content:center;
+}
+.qr-box canvas{image-rendering:pixelated;width:100%;height:100%}
+.pix-code{
+  display:flex;align-items:center;gap:8px;background:#f2f6f4;border:1px solid #dde5e1;
+  border-radius:12px;padding:10px 12px;font-size:11.5px;color:var(--muted);
+  word-break:break-all;font-family:monospace;margin-bottom:14px;
+}
+.copy-btn{flex-shrink:0}
+.timer{
+  text-align:center;font-size:13px;color:var(--muted);margin-bottom:14px;font-variant-numeric:tabular-nums;
+}
+.timer.expired{color:var(--danger);font-weight:700}
+.spinner{
+  width:20px;height:20px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;
+  border-radius:50%;animation:spin .7s linear infinite;display:inline-block;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.tx-item{
+  background:#fff;border-radius:14px;padding:15px 17px;margin-bottom:10px;
+  box-shadow:0 3px 10px rgba(9,50,28,.05);display:flex;align-items:center;gap:13px;
+}
+.tx-ic{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;
+}
+.tx-ic.pix{background:#dcf3ee;color:#00806e}
+.tx-ic.cred{background:#e7ecfc;color:#3b5bdb}
+.tx-info{flex:1;min-width:0}
+.tx-info b{font-size:14px;display:block}
+.tx-info span{font-size:12px;color:var(--muted)}
+.tx-amt{text-align:right}
+.tx-amt b{font-size:14.5px;color:var(--p-dark);white-space:nowrap}
+.tx-amt small{display:block;font-size:11px;color:var(--muted)}
+.status-ok{color:var(--p);font-weight:700;font-size:11.5px}
+
+.success-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 24px}
+.check-circle{width:110px;height:110px;margin-bottom:22px}
+.check-circle circle{stroke:var(--p);stroke-width:5;fill:none;stroke-dasharray:320;stroke-dashoffset:320;animation:draw .7s ease forwards}
+.check-circle path{stroke:var(--p);stroke-width:7;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:draw .5s ease .5s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.success-wrap h2{font-size:23px;margin-bottom:8px}
+.success-wrap p{color:var(--muted);font-size:14.5px;line-height:1.55}
+.receipt{
+  width:100%;max-width:420px;background:#fff;border-radius:16px;padding:16px 18px;margin:22px 0;
+  box-shadow:0 4px 14px rgba(9,50,28,.07);text-align:left;
+}
+.receipt .row{display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;border-bottom:1px dashed #e4eae6}
+.receipt .row:last-child{border:none}
+.receipt .row b{text-align:right}
+
+.bottomnav{display:none}
+
+.toast{
+  position:fixed;top:20px;left:50%;transform:translate(-50%,-90px);z-index:70;
+  background:#12241b;color:#fff;font-size:13.5px;font-weight:600;
+  padding:12px 18px;border-radius:99px;box-shadow:0 10px 30px rgba(0,0,0,.3);
+  transition:transform .35s cubic-bezier(.2,.9,.3,1.3);white-space:nowrap;pointer-events:none;
+}
+.toast.show{transform:translate(-50%,0)}
+
+.profile-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.profile-head .avatar{width:58px;height:58px;font-size:22px}
+.profile-head b{font-size:18px}
+.profile-head span{display:block;font-size:12.5px;color:var(--muted)}
+.stat-mini{
+  flex:1;background:#fff;border-radius:14px;padding:13px;text-align:center;
+  box-shadow:0 3px 10px rgba(9,50,28,.05);
+}
+.stat-mini b{display:block;font-size:20px;color:var(--p-dark)}
+.stat-mini span{font-size:11.5px;color:var(--muted)}
+.menu-list{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 14px rgba(9,50,28,.06);margin-top:18px}
+.menu-item{
+  width:100%;display:flex;align-items:center;gap:12px;padding:16px 18px;
+  border-bottom:1px solid #f0f4f1;font-size:14.5px;font-weight:600;text-align:left;
+}
+.menu-item:last-child{border:none}
+.menu-item.danger{color:var(--danger)}
+.menu-item svg:first-child{color:var(--muted)}
+
+@media(min-width:901px){
+
+  #shell{display:flex;flex-direction:row}
+  #sidebar{
+    display:flex;flex-direction:column;width:252px;flex-shrink:0;
+    background:#fff;border-right:1px solid var(--line);
+    position:sticky;top:0;height:100vh;padding:22px 14px 16px;
+  }
+  .sb-logo{display:flex;align-items:center;gap:11px;padding:2px 8px 18px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .sb-logo .logo-badge{width:42px;height:42px;border-radius:13px;margin:0;background:var(--p);border:none}
+  .sb-logo b{font-size:17.5px;letter-spacing:-.2px}
+  #sidebar .nav-item{
+    display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:13px;
+    font-size:14.5px;font-weight:650;color:#5c6b63;transition:.15s;text-align:left;margin-bottom:2px;
+  }
+  #sidebar .nav-item:hover{background:#f0f5f2;color:var(--p-dark)}
+  #sidebar .nav-item.active{background:var(--p-soft);color:var(--p-dark)}
+  #sidebar .nav-ic{width:auto;height:auto;background:none;display:flex;align-items:center}
+  .sb-spacer{flex:1}
+  .sb-user{
+    display:flex;align-items:center;gap:11px;padding:13px 11px 4px;border-top:1px solid var(--line);margin-top:12px;
+  }
+  .sb-user .avatar{width:40px;height:40px;font-size:16px}
+  .sb-user>div{min-width:0;flex:1}
+  .sb-user b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sb-user span{font-size:11.5px;color:var(--muted)}
+  .sb-user button{
+    width:34px;height:34px;border-radius:10px;color:var(--danger);background:#fdf0f0;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;
+  }
+  .sb-user button:hover{background:#fbe3e3}
+
+  #screen-login.active{flex-direction:row}
+  .login-wrap{flex-direction:row;background:none}
+  .brand-pane{
+    width:44%;max-width:540px;text-align:left;display:flex;flex-direction:column;justify-content:center;
+    padding:60px 56px;background:linear-gradient(160deg,#007c33 0%,#00a344 55%,#23b95d 100%);color:#fff;
+  }
+  .brand-pane h1{font-size:40px}
+  .brand-pane .logo-badge{margin:0 0 22px}
+  .feat{display:flex;align-items:center;gap:12px;margin-top:15px;font-size:14.5px;color:rgba(255,255,255,.92)}
+  .feat svg{flex-shrink:0}
+  .login-side{background:#f6faf8;justify-content:center;align-items:center;padding:50px 40px}
+  .sim-note{color:var(--muted)}
+  .sim-note b{color:var(--p-dark)}
+
+  .appbar .avatar{display:none}
+  #screen-recharge .content{max-width:800px}
+  #screen-extrato .content{max-width:900px}
+  #screen-perfil .content{max-width:720px}
+}
+
+@media(max-width:900px){
+  .bottomnav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:30;
+    background:#fff;padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+    box-shadow:0 -6px 24px rgba(9,50,28,.09);
+  }
+  .bottomnav .nav-item{
+    flex:1;flex-direction:column;align-items:center;gap:3px;
+    font-size:11px;font-weight:700;color:#93a29a;padding:6px 0;border-radius:12px;
+  }
+  .bottomnav .nav-item.active{color:var(--p-dark)}
+  .bottomnav .nav-ic{width:44px;height:28px;border-radius:99px;display:flex;align-items:center;justify-content:center}
+  .bottomnav .nav-item.active .nav-ic{background:var(--p-soft)}
+
+  .appbar{
+    background:linear-gradient(150deg,#007c33,#00a344 55%,#1cb357);
+    color:#fff;padding:24px 18px 58px;border-radius:0 0 28px 28px;align-items:center;max-width:none;
+  }
+  .appbar h2{font-size:21px}
+  .appbar p{opacity:.85;color:#fff;font-size:13.5px;margin-top:2px}
+  .tag-sim{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.35);color:#fff}
+  .content{padding:0 18px 104px;margin-top:-40px;max-width:none}
+  .grid-home{display:block}
+  .saldo-card{margin-bottom:18px}
+  .section-title{margin:20px 2px 10px;font-size:15px}
+
+  .overlay{align-items:flex-end;padding:0}
+  .sheet{
+    max-width:none;border-radius:26px 26px 0 0;max-height:94%;
+    padding:22px 22px calc(26px + env(safe-area-inset-bottom));animation:up .3s ease;
+  }
+  @keyframes up{from{transform:translateY(60px);opacity:.4}to{transform:none;opacity:1}}
+}
+</style>
+</head>
+<body>
+<div id="phone">
+
+  <div class="toast" id="toast"></div>
+
+  <section id="screen-login" class="screen active">
+    <div class="login-wrap">
+      <div class="brand-pane">
+        <div class="logo-badge">
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
+        </div>
+        <h1>RecargaBus</h1>
+        <p class="tagline">Sua recarga de passagem em segundos</p>
+        <div class="feat">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          Recarga via Pix ou cartão de crédito
+        </div>
+        <div class="feat">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          Consulta de unidades em tempo real
+        </div>
+        <div class="feat">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          Histórico completo de transações
+        </div>
+      </div>
+      <div class="login-side">
+        <form class="login-card" id="login-form" autocomplete="off">
+          <h2>Entrar na conta</h2>
+          <p class="hint-sub">Simulação: qualquer login e senha criam uma conta fictícia.</p>
+          <div class="error-msg" id="login-error"></div>
+          <div class="field">
+            <label for="in-login">Login ou e-mail</label>
+            <input id="in-login" type="text" placeholder="ex: sofia.silva ou seu@email.com" minlength="3" required>
+          </div>
+          <div class="field">
+            <label for="in-pass">Senha</label>
+            <input id="in-pass" type="password" placeholder="Mínimo 4 caracteres" minlength="4" required>
+          </div>
+          <button class="btn" type="submit">Entrar</button>
+        </form>
+        <p class="sim-note">Acesso administrador: <b>admin@recargabus.com</b> · senha <b>admin123</b><br>Projeto demonstrativo. Nenhum pagamento é real e nenhum dado pessoal é coletado.</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="shell" class="hidden">
+
+    <aside id="sidebar">
+      <div class="sb-logo">
+        <span class="logo-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg></span>
+        <b>RecargaBus</b>
+      </div>
+      <button class="nav-item active" data-nav="home" onclick="go('home')">
+        <span class="nav-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span>
+        Início
+      </button>
+      <button class="nav-item" data-nav="recharge" onclick="startRecharge()">
+        <span class="nav-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></span>
+        Recarregar
+      </button>
+      <button class="nav-item" data-nav="extrato" onclick="go('extrato')">
+        <span class="nav-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+        Extrato
+      </button>
+      <button class="nav-item" data-nav="perfil" onclick="go('perfil')">
+        <span class="nav-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        Perfil
+      </button>
+      <div class="sb-spacer"></div>
+      <div class="sb-user">
+        <div class="avatar" id="avatar-sb">?</div>
+        <div><b id="sb-login">—</b><span id="sb-type">Conta simulada</span></div>
+        <button onclick="logout()" title="Sair da conta">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <div id="main-col">
+
+      <section id="screen-home" class="screen">
+        <header class="appbar">
+          <div>
+            <h2 id="greet">Olá!</h2>
+            <p>Bem-vindo(a) de volta</p>
+          </div>
+          <div class="right">
+            <span class="tag-sim">SIMULAÇÃO</span>
+            <div class="avatar" id="avatar">?</div>
+          </div>
+        </header>
+        <main class="content grid-home">
+          <div class="col-a">
+            <div class="saldo-card">
+              <div>
+                <div class="lbl">Unidades disponíveis</div>
+                <div class="val" id="total-units">0 <small>un.</small></div>
+              </div>
+              <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#00a344" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".85"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
+            </div>
+            <div class="actions-grid">
+              <button class="action-tile" onclick="startRecharge()">
+                <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+                <b>Recarregar</b><span>Adicionar unidades</span>
+              </button>
+              <button class="action-tile" onclick="go('extrato')">
+                <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+                <b>Extrato</b><span>Histórico de compras</span>
+              </button>
+            </div>
+          </div>
+          <div class="col-b">
+            <div class="section-title">Meus cartões</div>
+            <div id="cards-list"></div>
+          </div>
+        </main>
+      </section>
+
+      <section id="screen-recharge" class="screen">
+        <header class="appbar">
+          <div><h2>Recarregar</h2><p>Cada unidade custa R$ 4,50</p></div>
+          <div class="right"><span class="tag-sim">SIMULAÇÃO</span></div>
+        </header>
+        <main class="content">
+          <div class="steps" id="steps-ind">
+            <div class="step-dot on" data-step="1"></div>
+            <div class="step-dot" data-step="2"></div>
+            <div class="step-dot" data-step="3"></div>
+          </div>
+
+          <div class="r-step" data-step="1">
+            <button class="back-link" onclick="go('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Voltar ao início</button>
+            <div class="panel" style="margin-top:10px">
+              <h3>Código do cartão</h3>
+              <p class="desc">Digite os 12 números impressos no verso do seu cartão.</p>
+              <input class="code-input" id="in-card-code" inputmode="numeric" maxlength="14" placeholder="0000 0000 0000" autocomplete="off">
+              <button type="button" class="link-btn" onclick="useDemoCard()">Usar cartão de demonstração</button>
+              <div style="margin-top:20px">
+                <button class="btn" onclick="validateCode()">Continuar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="r-step hidden" data-step="2">
+            <button class="back-link" onclick="rstep(1)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Alterar cartão</button>
+            <div class="panel" style="margin-top:10px">
+              <h3>Quantas unidades?</h3>
+              <p class="desc">Cartão <b id="qty-card-code" style="color:var(--txt)"></b></p>
+              <div class="qty-row">
+                <button class="qty-btn" onclick="chQty(-1)">−</button>
+                <div class="qty-val" id="qty-display">10</div>
+                <button class="qty-btn" onclick="chQty(1)">+</button>
+              </div>
+              <div class="chips">
+                <button class="chip" onclick="setQty(5)">5</button>
+                <button class="chip sel" onclick="setQty(10)">10</button>
+                <button class="chip" onclick="setQty(20)">20</button>
+                <button class="chip" onclick="setQty(40)">40</button>
+              </div>
+              <div class="summary">
+                <div class="l"><span id="sum-detail">10 un × R$ 4,50</span></div>
+                <div class="r" id="sum-total">R$ 45,00</div>
+              </div>
+              <button class="btn" onclick="rstep(3)">Escolher pagamento</button>
+            </div>
+          </div>
+
+          <div class="r-step hidden" data-step="3">
+            <button class="back-link" onclick="rstep(2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Alterar quantidade</button>
+            <div class="panel" style="margin-top:10px">
+              <h3>Forma de pagamento</h3>
+              <p class="desc">Recarga de <b id="pay-summary" style="color:var(--txt)"></b>. Escolha como quer pagar:</p>
+              <button class="pay-opt pix" onclick="openPix()">
+                <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg></span>
+                <span style="flex:1"><b>Pix</b><span>Aprovação imediata · simulação</span></span>
+                <span class="arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
+              </button>
+              <button class="pay-opt cred" onclick="openCard()">
+                <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
+                <span style="flex:1"><b>Cartão de crédito</b><span>Débito em 1× · simulação</span></span>
+                <span class="arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
+              </button>
+              <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:6px">Nenhuma cobrança real será efetuada.</p>
+            </div>
+          </div>
+
+          <div class="r-step hidden" data-step="4" style="flex:1;display:none">
+            <div class="success-wrap">
+              <svg class="check-circle" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><path d="M38 62l16 15 28-32"/></svg>
+              <h2>Recarga aprovada!</h2>
+              <p>Suas unidades já estão disponíveis no cartão.</p>
+              <div class="receipt" id="receipt"></div>
+              <button class="btn" style="max-width:260px" onclick="finishRecharge()">Concluir</button>
+            </div>
+          </div>
+        </main>
+      </section>
+
+      <section id="screen-extrato" class="screen">
+        <header class="appbar">
+          <div><h2>Extrato</h2><p>Histórico de recargas</p></div>
+          <div class="right">
+            <span class="tag-sim">SIMULAÇÃO</span>
+            <div class="avatar" id="avatar-ext">?</div>
+          </div>
+        </header>
+        <main class="content">
+          <div id="tx-list"></div>
+        </main>
+      </section>
+
+      <section id="screen-perfil" class="screen">
+        <header class="appbar">
+          <div><h2>Perfil</h2><p>Sua conta</p></div>
+          <div class="right"><span class="tag-sim">SIMULAÇÃO</span></div>
+        </header>
+        <main class="content">
+          <div class="profile-head">
+            <div class="avatar" id="avatar-perf">?</div>
+            <div><b id="profile-login">login</b><span id="profile-type">Conta de demonstração</span></div>
+          </div>
+          <div style="display:flex;gap:11px">
+            <div class="stat-mini"><b id="stat-units">0</b><span>unidades ativas</span></div>
+            <div class="stat-mini"><b id="stat-count">0</b><span>recargas feitas</span></div>
+          </div>
+          <div class="menu-list">
+            <button class="menu-item" onclick="showRules()">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              Como funciona a simulação
+            </button>
+            <button class="menu-item danger" onclick="resetData()">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+              Apagar meus dados
+            </button>
+            <button class="menu-item danger" onclick="logout()">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+              Sair da conta
+            </button>
+          </div>
+        </main>
+      </section>
+
+    </div>
+
+    <nav class="bottomnav" id="nav">
+      <button class="nav-item active" data-nav="home" onclick="go('home')">
+        <span class="nav-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span>
+        Início
+      </button>
+      <button class="nav-item" data-nav="recharge" onclick="startRecharge()">
+        <span class="nav-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></span>
+        Recarregar
+      </button>
+      <button class="nav-item" data-nav="extrato" onclick="go('extrato')">
+        <span class="nav-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+        Extrato
+      </button>
+      <button class="nav-item" data-nav="perfil" onclick="go('perfil')">
+        <span class="nav-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        Perfil
+      </button>
+    </nav>
+
+  </div>
+
+  <div class="overlay" id="modal-pix">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3>Pagar com Pix</h3>
+        <button class="close-x" onclick="closePay()">✕</button>
+      </div>
+      <div class="amount-big" id="pix-amount">R$ 0,00</div>
+      <div class="qr-box"><canvas id="qr-canvas" width="290" height="290"></canvas></div>
+      <div class="pix-code">
+        <span id="pix-payload"></span>
+        <button class="btn small ghost copy-btn" style="padding:8px 12px;font-size:12px" onclick="copyPix()">Copiar</button>
+      </div>
+      <div class="timer" id="pix-timer">Pix expira em 10:00 (simulação)</div>
+      <button class="btn" id="pix-confirm" onclick="confirmPix()">Já paguei — confirmar</button>
+      <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Simulação: nenhum Pix real é gerado ou cobrado.</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="modal-card">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3>Cartão de crédito</h3>
+        <button class="close-x" onclick="closePay()">✕</button>
+      </div>
+      <div class="amount-big" id="card-amount">R$ 0,00</div>
+      <form id="card-form" autocomplete="off">
+        <div class="field">
+          <label for="cc-num">Número do cartão</label>
+          <input id="cc-num" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000" required>
+        </div>
+        <div class="field">
+          <label for="cc-name">Nome impresso no cartão</label>
+          <input id="cc-name" type="text" placeholder="COMO ESTÁ NO CARTÃO" required>
+        </div>
+        <div style="display:flex;gap:12px">
+          <div class="field" style="flex:1">
+            <label for="cc-exp">Validade</label>
+            <input id="cc-exp" inputmode="numeric" maxlength="5" placeholder="MM/AA" required>
+          </div>
+          <div class="field" style="flex:1">
+            <label for="cc-cvv">CVV</label>
+            <input id="cc-cvv" inputmode="numeric" maxlength="3" placeholder="123" required>
+          </div>
+        </div>
+        <div class="error-msg" id="card-error"></div>
+        <button class="btn" type="submit" id="card-pay">Pagar agora</button>
+      </form>
+      <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Simulação: não insira dados reais de cartão.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+const KEY = "recargabus_sim_v1";
+const PRECO = 4.5;
+const ADMIN_LOGIN = "admin@recargabus.com";
+const ADMIN_PASS = "admin123";
+
+let db = loadDB();
+let session = localStorage.getItem(KEY + "_sess") || null;
+let cur = { code: "", qty: 10, method: "" };
+let pixTimer = null;
+let pixDeadline = 0;
+
+function loadDB() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY));
+    if (raw && raw.users) return raw;
+  } catch (e) {}
+  return { users: {} };
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(db)); }
+
+function user() { return session ? db.users[session] : null; }
+function fmt(v) { return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
+function fmtCode(digits) { return digits.replace(/(\d{4})(?=\d)/g, "$1 ").trim(); }
+function totalUnits(u) { return Object.values(u.cards).reduce((a, b) => a + b, 0); }
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+const $ = id => document.getElementById(id);
+
+function showLoginError(msg) {
+  const el = $("login-error");
+  el.textContent = msg;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+}
+
+$("login-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const login = $("in-login").value.trim().toLowerCase();
+  const pass = $("in-pass").value;
+  if (login === ADMIN_LOGIN) {
+    if (pass !== ADMIN_PASS) return showLoginError("Senha incorreta para o administrador.");
+    if (!db.users[ADMIN_LOGIN]) db.users[ADMIN_LOGIN] = { cards: {}, tx: [], isAdmin: true };
+  } else {
+    if (login.length < 3) return showLoginError("Informe um login com pelo menos 3 caracteres.");
+    if (pass.length < 4) return showLoginError("A senha precisa ter pelo menos 4 caracteres.");
+    if (!db.users[login]) db.users[login] = { cards: {}, tx: [] };
+  }
+  save();
+  loginAs(login);
+});
+
+function loginAs(login) {
+  session = login;
+  localStorage.setItem(KEY + "_sess", login);
+  $("shell").classList.remove("hidden");
+  $("screen-login").classList.remove("active");
+  go("home");
+  toast("Bem-vindo(a), " + login + "!");
+}
+
+function logout() {
+  if (!confirm("Sair da sua conta?")) return;
+  clearInterval(pixTimer);
+  closePay();
+  session = null;
+  localStorage.removeItem(KEY + "_sess");
+  $("shell").classList.add("hidden");
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $("screen-login").classList.add("active");
+  $("in-login").value = "";
+  $("in-pass").value = "";
+}
+
+function boot() {
+  if (session && db.users[session]) {
+    $("shell").classList.remove("hidden");
+    go("home");
+  } else {
+    session = null;
+    localStorage.removeItem(KEY + "_sess");
+  }
+}
+
+function go(name) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  const target = $("screen-" + name);
+  if (target) target.classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(n =>
+    n.classList.toggle("active", n.dataset.nav === name)
+  );
+  renderAll();
+  window.scrollTo({ top: 0 });
+}
+
+function renderAll() {
+  const u = user();
+  if (!u) return;
+  const first = u.isAdmin ? "Admin" : session.split(".")[0];
+  const cap = first.charAt(0).toUpperCase() + first.slice(1);
+  $("greet").textContent = "Olá, " + cap + "!";
+  ["avatar", "avatar-ext", "avatar-perf", "avatar-sb"].forEach(id => $(id).textContent = first.charAt(0));
+  $("profile-login").textContent = session;
+  $("sb-login").textContent = session;
+  $("sb-type").textContent = u.isAdmin ? "Administrador" : "Conta simulada";
+  $("profile-type").textContent = u.isAdmin ? "Conta administradora" : "Conta de demonstração";
+
+  const tot = totalUnits(u);
+  $("total-units").innerHTML = tot + " <small>un.</small>";
+  $("stat-units").textContent = tot;
+  $("stat-count").textContent = u.tx.length;
+
+  const list = $("cards-list");
+  const codes = Object.keys(u.cards);
+  if (!codes.length) {
+    list.innerHTML =
+      '<div class="empty-state">' +
+      '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6d7d75" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>' +
+      '<p>Nenhum cartão por aqui ainda.<br><b>Faça sua primeira recarga!</b></p>' +
+      '<button class="btn small" style="margin-top:16px" onclick="startRecharge()">Recarregar agora</button></div>';
+  } else {
+    list.innerHTML = codes.map(c =>
+      '<div class="card-item"><div><div class="code">' + fmtCode(c) +
+      '</div><div class="sub">Cartão cadastrado</div></div>' +
+      '<div class="units-pill">' + u.cards[c] + ' un.</div></div>'
+    ).join("");
+  }
+
+  const tl = $("tx-list");
+  if (!u.tx.length) {
+    tl.innerHTML = '<div class="empty-state"><p>Você ainda não fez recargas.<br><b>Elas aparecerão aqui.</b></p></div>';
+  } else {
+    tl.innerHTML = u.tx.map(t => {
+      const d = new Date(t.date).toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+      const label = t.method === "pix" ? "Pix" : "Crédito";
+      return '<div class="tx-item"><div class="tx-ic ' + t.method + '">' + (t.method === "pix" ? "P" : "C") +
+        '</div><div class="tx-info"><b>+ ' + t.qty + ' unidades</b>' +
+        '<span>' + label + " · " + fmtCode(t.code) + "</span>" +
+        '<div class="status-ok">Aprovada · ' + d + '</div></div>' +
+        '<div class="tx-amt"><b>' + fmt(t.total) + "</b><small>1×</small></div></div>";
+    }).join("");
+  }
+}
+
+function startRecharge() {
+  cur = { code: "", qty: 10, method: "" };
+  $("in-card-code").value = "";
+  setQty(10);
+  rstep(1);
+  go("recharge");
+}
+
+function rstep(n) {
+  document.querySelectorAll(".r-step").forEach(s => {
+    const on = Number(s.dataset.step) === n;
+    s.classList.toggle("hidden", !on);
+    s.style.display = on ? (n === 4 ? "flex" : "block") : "none";
+  });
+  document.querySelectorAll(".step-dot").forEach(d =>
+    d.classList.toggle("on", Number(d.dataset.step) <= Math.min(n, 3))
+  );
+  $("steps-ind").style.visibility = n >= 4 ? "hidden" : "visible";
+}
+
+$("in-card-code").addEventListener("input", e => {
+  let v = e.target.value.replace(/\D/g, "").slice(0, 12);
+  e.target.value = v.replace(/(\d{4})(?=\d)/g, "$1 ");
+});
+$("in-card-code").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); validateCode(); }
+});
+
+function useDemoCard() {
+  $("in-card-code").value = "4815 1299 0037";
+  validateCode();
+}
+
+function validateCode() {
+  const digits = $("in-card-code").value.replace(/\D/g, "");
+  if (digits.length !== 12) {
+    toast("O código deve ter exatamente 12 números");
+    $("in-card-code").focus();
+    return;
+  }
+  cur.code = digits;
+  $("qty-card-code").textContent = fmtCode(digits);
+  setQty(cur.qty);
+  rstep(2);
+}
+
+function chQty(delta) { setQty(Math.min(40, Math.max(1, cur.qty + delta))); }
+function setQty(q) {
+  cur.qty = q;
+  $("qty-display").textContent = q;
+  document.querySelectorAll(".chip").forEach(c =>
+    c.classList.toggle("sel", Number(c.textContent) === q)
+  );
+  $("sum-detail").textContent = q + " un × " + fmt(PRECO);
+  $("sum-total").textContent = fmt(q * PRECO);
+}
+
+function openPayment(method) {
+  cur.method = method;
+  const total = cur.qty * PRECO;
+  $("pay-summary").textContent = cur.qty + " unidades (" + fmt(total) + ")";
+}
+
+function openPix() {
+  openPayment("pix");
+  const payload = "00020126BR.GOV.BCB.PIX01RECARGABUS-SIM5204000053039865802BR5913SIMULADOR6009SAO PAULO62" +
+    String(5000 + Math.floor(Math.random() * 900)) + "04" + Date.now().toString().slice(-10) + "6304ABCD";
+  $("pix-amount").textContent = fmt(cur.qty * PRECO);
+  $("pix-payload").textContent = payload;
+  drawQR($("qr-canvas"), payload);
+  startPixTimer();
+  $("pix-confirm").disabled = false;
+  $("pix-confirm").innerHTML = "Já paguei — confirmar";
+  $("modal-pix").classList.add("show");
+}
+
+function startPixTimer() {
+  clearInterval(pixTimer);
+  pixDeadline = Date.now() + 600 * 1000;
+  updateTimer();
+  pixTimer = setInterval(updateTimer, 500);
+}
+
+function updateTimer() {
+  const left = Math.max(0, Math.floor((pixDeadline - Date.now()) / 1000));
+  const m = String(Math.floor(left / 60)).padStart(2, "0");
+  const s = String(left % 60).padStart(2, "0");
+  const el = $("pix-timer");
+  el.textContent = "Pix expira em " + m + ":" + s + " (simulação)";
+  el.classList.toggle("expired", left === 0);
+  if (left === 0) {
+    clearInterval(pixTimer);
+    $("pix-confirm").disabled = true;
+    $("pix-confirm").textContent = "Pix expirado";
+  }
+}
+
+function copyPix() {
+  const txt = $("pix-payload").textContent;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => toast("Código Pix copiado"), () => fallbackCopy(txt));
+  } else fallbackCopy(txt);
+}
+function fallbackCopy(txt) {
+  const ta = document.createElement("textarea");
+  ta.value = txt; document.body.appendChild(ta); ta.select();
+  try { document.execCommand("copy"); toast("Código Pix copiado"); } catch (e) {}
+  ta.remove();
+}
+
+function confirmPix() {
+  const btn = $("pix-confirm");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>&nbsp;Confirmando pagamento…';
+  setTimeout(() => {
+    clearInterval(pixTimer);
+    approve("pix");
+  }, 1800);
+}
+
+function openCard() {
+  openPayment("cred");
+  $("card-amount").textContent = fmt(cur.qty * PRECO);
+  $("card-error").classList.remove("show");
+  $("card-pay").disabled = false;
+  $("card-pay").textContent = "Pagar agora";
+  $("modal-card").classList.add("show");
+}
+
+$("cc-num").addEventListener("input", e => {
+  let v = e.target.value.replace(/\D/g, "").slice(0, 16);
+  e.target.value = v.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
+});
+$("cc-exp").addEventListener("input", e => {
+  let v = e.target.value.replace(/\D/g, "").slice(0, 4);
+  e.target.value = v.length > 2 ? v.slice(0, 2) + "/" + v.slice(2) : v;
+});
+$("cc-cvv").addEventListener("input", e => {
+  e.target.value = e.target.value.replace(/\D/g, "").slice(0, 3);
+});
+
+$("card-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const err = msg => {
+    const el = $("card-error");
+    el.textContent = msg;
+    el.classList.remove("show");
+    void el.offsetWidth;
+    el.classList.add("show");
+  };
+  const num = $("cc-num").value.replace(/\D/g, "");
+  const exp = $("cc-exp").value.replace(/\D/g, "");
+  const cvv = $("cc-cvv").value;
+  if (num.length !== 16) return err("O número do cartão deve ter 16 dígitos.");
+  if (!$("cc-name").value.trim()) return err("Informe o nome impresso no cartão.");
+  if (exp.length !== 4 || Number(exp.slice(0, 2)) < 1 || Number(exp.slice(0, 2)) > 12)
+    return err("Validade inválida (use MM/AA).");
+  if (cvv.length !== 3) return err("O CVV deve ter 3 dígitos.");
+  const btn = $("card-pay");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>&nbsp;Processando…';
+  setTimeout(() => approve("cred"), 2000);
+});
+
+function closePay() {
+  $("modal-pix").classList.remove("show");
+  $("modal-card").classList.remove("show");
+  clearInterval(pixTimer);
+}
+
+function approve(method) {
+  const u = user();
+  u.cards[cur.code] = (u.cards[cur.code] || 0) + cur.qty;
+  u.tx.unshift({
+    date: new Date().toISOString(),
+    code: cur.code,
+    qty: cur.qty,
+    method,
+    total: +(cur.qty * PRECO).toFixed(2),
+    status: "Aprovada"
+  });
+  save();
+  const total = fmt(cur.qty * PRECO);
+  $("receipt").innerHTML =
+    row("Cartão", fmtCode(cur.code)) +
+    row("Unidades", "+" + cur.qty + " un.") +
+    row("Pagamento", method === "pix" ? "Pix" : "Cartão de crédito") +
+    row("Total", "<span style='color:var(--p-dark)'>" + total + "</span>") +
+    row("Status", "<span class='status-ok'>Aprovada (simulada)</span>");
+  closePay();
+  rstep(4);
+  function row(k, v) { return '<div class="row"><span>' + k + "</span><b>" + v + "</b></div>"; }
+}
+
+function finishRecharge() {
+  go("home");
+}
+
+["modal-pix", "modal-card"].forEach(id => {
+  $(id).addEventListener("click", e => { if (e.target === $(id)) closePay(); });
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePay(); });
+
+function resetData() {
+  if (!confirm("Apagar todos os seus cartões e histórico desta simulação?")) return;
+  db.users[session] = { cards: {}, tx: [], isAdmin: user().isAdmin };
+  save();
+  renderAll();
+  toast("Dados apagados");
+}
+
+function showRules() {
+  alert(
+    "Isto é uma SIMULAÇÃO para fins de demonstração.\n\n" +
+    "- Login: qualquer login e senha (4+ caracteres) criam uma conta fictícia local.\n" +
+    "- Cartões, unidades, Pix e pagamentos são fictícios.\n" +
+    "- Os dados ficam salvos apenas no seu navegador (localStorage).\n" +
+    "- Nenhuma cobrança real é feita."
+  );
+}
+
+function seedFrom(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function drawQR(canvas, text) {
+  const N = 25, Q = 2, M = N + Q * 2;
+  const ctx = canvas.getContext("2d");
+  const cell = canvas.width / M;
+  const rnd = mulberry32(seedFrom(text));
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#12241b";
+  for (let y = 0; y < N; y++)
+    for (let x = 0; x < N; x++) {
+      const inFinder = (x < 8 && y < 8) || (x > N - 9 && y < 8) || (x < 8 && y > N - 9);
+      if (!inFinder && rnd() < 0.46)
+        ctx.fillRect((x + Q) * cell, (y + Q) * cell, cell + 0.5, cell + 0.5);
+    }
+  const finder = (fx, fy) => {
+    for (let y = 0; y < 7; y++)
+      for (let x = 0; x < 7; x++) {
+        const edge = x === 0 || y === 0 || x === 6 || y === 6;
+        const core = x >= 2 && x <= 4 && y >= 2 && y <= 4;
+        if (edge || core)
+          ctx.fillRect((fx + x + Q) * cell, (fy + y + Q) * cell, cell + 0.5, cell + 0.5);
+      }
+  };
+  finder(0, 0); finder(N - 7, 0); finder(0, N - 7);
+}
+
+boot();
+</script>
+</body>
+</html>
