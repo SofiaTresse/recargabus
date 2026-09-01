@@ -1,0 +1,13 @@
+{
+  "name": "recargabus",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RecargaBus — mapa ao vivo dos ônibus de Uberaba (Worker: app estático + proxy CORS da Auttran)",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
