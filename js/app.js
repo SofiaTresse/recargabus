@@ -43,17 +43,61 @@ function showLoginError(msg) {
   el.classList.add("show");
 }
 
+let loginMode = "login";
+
+function setLoginMode(mode) {
+  loginMode = mode;
+  document.querySelectorAll("#login-mode .seg-btn").forEach(b =>
+    b.classList.toggle("on", b.dataset.mode === mode)
+  );
+  const isCpf = mode === "cpf";
+  $("in-login-field").style.display = isCpf ? "none" : "";
+  $("in-cpf-field").style.display = isCpf ? "" : "none";
+  if (isCpf) $("in-cpf").focus();
+  else $("in-login").focus();
+}
+
+function maskCpf(v) {
+  const d = v.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return d.slice(0, 3) + "." + d.slice(3);
+  if (d.length <= 9) return d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6);
+  return d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6, 9) + "-" + d.slice(9);
+}
+
+function validCpf(cpf) {
+  const d = cpf.replace(/\D/g, "");
+  if (d.length !== 11 || /^(\d)\1{10}$/.test(d)) return false;
+  const calc = n => {
+    let sum = 0;
+    for (let i = 0; i < n; i++) sum += parseInt(d[i]) * (n + 1 - i);
+    const r = (sum * 10) % 11;
+    return r === 10 ? 0 : r;
+  };
+  return calc(9) === parseInt(d[9]) && calc(10) === parseInt(d[10]);
+}
+
+$("in-cpf").addEventListener("input", e => {
+  e.target.value = maskCpf(e.target.value);
+});
+
 $("login-form").addEventListener("submit", e => {
   e.preventDefault();
-  const login = $("in-login").value.trim().toLowerCase();
   const pass = $("in-pass").value;
+  let login;
+  if (loginMode === "cpf") {
+    const cpf = $("in-cpf").value;
+    if (!validCpf(cpf)) return showLoginError("CPF inválido. Verifique os 11 dígitos.");
+    login = "cpf:" + cpf.replace(/\D/g, "");
+  } else {
+    login = $("in-login").value.trim().toLowerCase();
+    if (login.length < 3) return showLoginError("Informe um login com pelo menos 3 caracteres.");
+  }
+  if (pass.length < 4) return showLoginError("A senha precisa ter pelo menos 4 caracteres.");
   if (login === ADMIN_LOGIN) {
     if (pass !== ADMIN_PASS) return showLoginError("Senha incorreta para o administrador.");
-    if (!db.users[ADMIN_LOGIN]) db.users[ADMIN_LOGIN] = { cards: {}, tx: [], isAdmin: true };
-  } else {
-    if (login.length < 3) return showLoginError("Informe um login com pelo menos 3 caracteres.");
-    if (pass.length < 4) return showLoginError("A senha precisa ter pelo menos 4 caracteres.");
-    if (!db.users[login]) db.users[login] = { cards: {}, tx: [] };
+  } else if (!db.users[login]) {
+    db.users[login] = { cards: {}, tx: [] };
   }
   db.users[login].pass = pass;
   save();
@@ -66,7 +110,12 @@ function loginAs(login) {
   $("shell").classList.remove("hidden");
   $("screen-login").classList.remove("active");
   go("home");
-  toast("Bem-vindo(a), " + login + "!");
+  toast("Bem-vindo(a), " + friendlyId(login) + "!");
+}
+
+function friendlyId(login) {
+  if (/^cpf:/.test(login)) return maskCpf(login.slice(4));
+  return login;
 }
 
 function logout() {
@@ -109,12 +158,13 @@ function go(name) {
 function renderAll() {
   const u = user();
   if (!u) return;
-  const first = u.isAdmin ? "Admin" : session.split(".")[0];
+  const friendlyLogin = friendlyId(session);
+  const first = u.isAdmin ? "Admin" : friendlyLogin.split(".")[0];
   const cap = first.charAt(0).toUpperCase() + first.slice(1);
   $("greet").textContent = "Olá, " + cap + "!";
   ["avatar", "avatar-ext", "avatar-perf", "avatar-sb"].forEach(id => $(id).textContent = first.charAt(0));
-  $("profile-login").textContent = session;
-  $("sb-login").textContent = session;
+  $("profile-login").textContent = friendlyLogin;
+  $("sb-login").textContent = friendlyLogin;
   $("sb-type").textContent = u.isAdmin ? "Administrador" : "Conta RecargaBus";
   $("profile-type").textContent = u.isAdmin ? "Conta administradora" : "Conta RecargaBus";
 
@@ -1166,5 +1216,17 @@ const UB_LINES_HTML =
   '<tr class="cltr"><td></td><td>120</td><td>Interbairros 1</td></tr>' +
   '<tr class="cltr"><td></td><td>121</td><td>Interbairros 2</td></tr>' +
   '<tr class="cltr"><td></td><td>200</td><td>BRT - Vetor</td></tr></table></div>';
+
+function openCredits() {
+  document.getElementById("modal-credits").classList.add("show");
+}
+
+function closeCredits() {
+  document.getElementById("modal-credits").classList.remove("show");
+}
+
+$("modal-credits").addEventListener("click", e => {
+  if (e.target === $("modal-credits")) closeCredits();
+});
 
 boot();

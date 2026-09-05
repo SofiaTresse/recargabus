@@ -366,12 +366,12 @@ input{font-family:inherit}
   #screen-login.active{flex-direction:row}
   .login-wrap{flex-direction:row;background:none}
   .brand-pane{
-    width:44%;max-width:540px;text-align:left;display:flex;flex-direction:column;justify-content:center;
+    width:44%;max-width:540px;text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;
     padding:60px 56px;background:linear-gradient(160deg,#007c33 0%,#00a344 55%,#23b95d 100%);color:#fff;
   }
   .brand-pane h1{font-size:40px}
   .brand-pane .logo-badge{margin:0 0 22px}
-  .feat{display:flex;align-items:center;gap:12px;margin-top:15px;font-size:14.5px;color:rgba(255,255,255,.92)}
+  .feat{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:15px;font-size:14.5px;color:rgba(255,255,255,.92)}
   .feat svg{flex-shrink:0}
   .login-side{background:#f6faf8;justify-content:center;align-items:center;padding:50px 40px}
   .sim-note{color:var(--muted)}
@@ -527,3 +527,21 @@ input{font-family:inherit}
   #bus-map{flex:none;height:40vh;min-height:350px}
   .map-panel{max-height:300px;overflow-y:auto;flex-direction:column}
 }
+
+.credits-btn{
+  display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+  margin-top:14px;padding:10px;font-size:12.5px;font-weight:600;color:var(--muted);
+  border:1px dashed var(--line);border-radius:12px;background:#fff;cursor:pointer;transition:.2s;
+}
+.credits-btn:hover{color:var(--p-dark);border-color:var(--p)}
+#modal-credits .sheet{max-width:660px;width:92%}
+.credits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px 14px}
+.credit-card{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.credit-photo{
+  width:140px;height:140px;border-radius:18px;overflow:hidden;flex-shrink:0;
+  background:#eef2f0;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+}
+.credit-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.credit-photo.no-photo svg{width:52px;height:52px;color:#b7c4bd}
+.credit-card span{font-size:14px;font-weight:700;color:var(--txt);line-height:1.25}

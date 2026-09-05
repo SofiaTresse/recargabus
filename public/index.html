@@ -329,6 +329,10 @@
               Sair da conta
             </button>
           </div>
+          <button class="credits-btn" onclick="openCredits()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Créditos
+          </button>
         </main>
       </section>
 
@@ -462,6 +466,50 @@
         <div class="error-msg" id="addcard-error"></div>
         <button class="btn" type="submit">Salvar cartão</button>
       </form>
+    </div>
+  </div>
+
+  <div class="overlay" id="modal-credits">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3>Créditos</h3>
+        <button class="close-x" onclick="closeCredits()">✕</button>
+      </div>
+      <p class="desc" style="text-align:center;margin:0 0 18px">Quem criou o RecargaBus</p>
+      <div class="credits-grid">
+        <div class="credit-card">
+          <div class="credit-photo"><img src="creditos/sofia.jpg" alt="Sofia Tresse Pires"></div>
+          <span>Sofia Tresse Pires</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo"><img src="creditos/ana.jpg" alt="Ana Julia Terone"></div>
+          <span>Ana Julia Terone</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo no-photo">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>ALine Awana</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo no-photo">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>Michelle</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo no-photo">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>Yasmin</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo no-photo">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>Oliveira</span>
+        </div>
+      </div>
     </div>
   </div>
 

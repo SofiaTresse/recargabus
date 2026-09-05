@@ -1217,4 +1217,16 @@ const UB_LINES_HTML =
   '<tr class="cltr"><td></td><td>121</td><td>Interbairros 2</td></tr>' +
   '<tr class="cltr"><td></td><td>200</td><td>BRT - Vetor</td></tr></table></div>';
 
+function openCredits() {
+  document.getElementById("modal-credits").classList.add("show");
+}
+
+function closeCredits() {
+  document.getElementById("modal-credits").classList.remove("show");
+}
+
+$("modal-credits").addEventListener("click", e => {
+  if (e.target === $("modal-credits")) closeCredits();
+});
+
 boot();

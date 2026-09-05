@@ -18,8 +18,8 @@
   <section id="screen-login" class="screen active">
     <div class="login-wrap">
       <div class="brand-pane">
-        <div class="logo-badge">
-          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg>
+        <div style="display:flex;justify-content:center;margin-bottom:8px">
+          <img src="icon.png" alt="RecargaBus" width="220" height="220" style="object-fit:contain;background:#fff;border-radius:14px;padding:0">
         </div>
         <h1>RecargaBus</h1>
         <p class="tagline">Sua recarga de passagem em segundos</p>
@@ -40,9 +40,17 @@
         <form class="login-card" id="login-form" autocomplete="off">
           <h2>Entrar na conta</h2>
           <div class="error-msg" id="login-error"></div>
-          <div class="field">
+          <div class="seg" id="login-mode" style="margin-bottom:14px">
+            <button type="button" class="seg-btn on" data-mode="login" onclick="setLoginMode('login')">Login / e-mail</button>
+            <button type="button" class="seg-btn" data-mode="cpf" onclick="setLoginMode('cpf')">CPF</button>
+          </div>
+          <div class="field" id="in-login-field">
             <label for="in-login">Login ou e-mail</label>
             <input id="in-login" type="text" placeholder="ex: sofia.silva ou seu@email.com" minlength="3" required>
+          </div>
+          <div class="field" id="in-cpf-field" style="display:none">
+            <label for="in-cpf">CPF</label>
+            <input id="in-cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00">
           </div>
           <div class="field">
             <label for="in-pass">Senha</label>
@@ -60,7 +68,7 @@
 
     <aside id="sidebar">
       <div class="sb-logo">
-        <span class="logo-badge"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/></svg></span>
+        <span class="logo-badge"><img src="icon.png" alt="RecargaBus" width="64" height="64" style="object-fit:contain;background:#fff;border-radius:50%;padding:8px"></span>
         <b>RecargaBus</b>
       </div>
       <button class="nav-item active" data-nav="home" onclick="go('home')">
@@ -321,6 +329,10 @@
               Sair da conta
             </button>
           </div>
+          <button class="credits-btn" onclick="openCredits()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Créditos
+          </button>
         </main>
       </section>
 
@@ -454,6 +466,50 @@
         <div class="error-msg" id="addcard-error"></div>
         <button class="btn" type="submit">Salvar cartão</button>
       </form>
+    </div>
+  </div>
+
+  <div class="overlay" id="modal-credits">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3>Créditos</h3>
+        <button class="close-x" onclick="closeCredits()">✕</button>
+      </div>
+      <p class="desc" style="text-align:center;margin:0 0 18px">Quem criou o RecargaBus</p>
+      <div class="credits-grid">
+        <div class="credit-card">
+          <div class="credit-photo"><img src="creditos/sofia.jpg" alt="Sofia Tresse Pires"></div>
+          <span>Sofia Tresse Pires</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo"><img src="creditos/ana.jpg" alt="Ana Julia Terone"></div>
+          <span>Ana Julia Terone</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo no-photo">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>ALine Awana</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo no-photo">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>Michelle</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo no-photo">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>Yasmin</span>
+        </div>
+        <div class="credit-card">
+          <div class="credit-photo no-photo">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>Oliveira</span>
+        </div>
+      </div>
     </div>
   </div>
 
