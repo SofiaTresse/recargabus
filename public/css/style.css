@@ -415,7 +415,9 @@ input{font-family:inherit}
     padding:22px 22px calc(26px + env(safe-area-inset-bottom));animation:up .3s ease;
   }
   @keyframes up{from{transform:translateY(60px);opacity:.4}to{transform:none;opacity:1}}
-  .site-footer{padding:8px 18px calc(16px + env(safe-area-inset-bottom));max-width:none}
+  .site-footer{padding:8px 18px calc(20px + env(safe-area-inset-bottom));max-width:none;font-size:12px}
+  #main-col .screen.active{min-height:auto}
+  .site-footer{order:99;margin-top:auto}
 }
 
 .map-wrap{display:flex;flex-direction:column;gap:16px;height:calc(100vh - 180px);min-height:400px}
