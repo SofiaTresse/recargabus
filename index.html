@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#00a344">
-<title>RecargaBus — Simulação</title>
+<title>RecargaBus</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <style>
@@ -47,6 +47,11 @@ input{font-family:inherit}
 }
 .field input:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--p-soft)}
 .field input::placeholder{color:#aab6af}
+.field select,.field input[type="file"]{
+  width:100%;padding:14px 15px;border-radius:12px;border:1.5px solid #dbe3de;
+  background:#fff;font-size:16px;color:var(--txt);outline:none;transition:.2s;
+}
+.field select:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--p-soft)}
 
 .login-wrap{
   flex:1;display:flex;flex-direction:column;
@@ -75,6 +80,11 @@ input{font-family:inherit}
   text-align:center;font-size:12px;color:rgba(255,255,255,.88);margin-top:18px;line-height:1.6;max-width:460px;
 }
 .sim-note b{color:#fff}
+.site-footer{
+  width:100%;max-width:1160px;margin:0 auto;text-align:center;
+  padding:6px 36px 30px;font-size:12.5px;color:var(--muted);
+}
+.login-footer{text-align:center;font-size:12.5px;color:rgba(255,255,255,.92);margin-top:22px}
 .error-msg{
   display:none;background:#fdecec;color:#b23030;border:1px solid #f5c6c6;
   border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:14px;
@@ -119,11 +129,27 @@ input{font-family:inherit}
   margin:2px 2px 12px;font-size:16px;font-weight:800;
 }
 .card-item{
-  background:#fff;border-radius:var(--radius);padding:16px 18px;margin-bottom:11px;
-  box-shadow:0 4px 14px rgba(9,50,28,.06);display:flex;justify-content:space-between;align-items:center;
+  background:#fff;border-radius:var(--radius);padding:12px;margin-bottom:11px;
+  box-shadow:0 4px 14px rgba(9,50,28,.06);
+  display:flex;align-items:center;gap:12px;
 }
-.card-item .code{font-weight:800;font-size:15.5px;letter-spacing:.5px}
+.card-item .card-img{width:75px;height:55px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#eef3f0}
+.card-item .card-mid{flex:1;min-width:0}
+.card-item .card-type{font-weight:800;font-size:15px;letter-spacing:.3px}
+.card-item .code{font-weight:600;font-size:13px;color:#5a6560;letter-spacing:.5px;margin-top:2px}
 .card-item .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.add-card{
+  background:var(--p-soft);color:var(--p-dark);border:none;font-weight:800;font-size:13px;
+  padding:8px 13px;border-radius:11px;cursor:pointer;transition:.2s;white-space:nowrap;
+}
+.add-card:hover{background:#d4e6dc}
+.pick-card{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #e2e8e4;border-radius:var(--radius);padding:12px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.pick-card:hover{border-color:#c9d6cf}
+.pick-card.sel{border-color:var(--p);box-shadow:0 0 0 3px var(--p-soft)}
+.pick-card .card-img{width:48px;height:35px;object-fit:cover;border-radius:5px;flex-shrink:0;background:#eef3f0}
+.radio-pick{width:18px;height:18px;border-radius:50%;border:2px solid #c6d2cc;flex-shrink:0;position:relative}
+.radio-pick.on{border-color:var(--p)}
+.radio-pick.on::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--p)}
 .units-pill{
   background:var(--p-soft);color:var(--p-dark);font-weight:800;font-size:14px;
   padding:8px 14px;border-radius:12px;white-space:nowrap;
@@ -196,7 +222,17 @@ input{font-family:inherit}
 .pay-opt .ic{
   width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
 }
-.pay-opt.pix .ic{background:#00a38a}.pay-opt.cred .ic{background:#3b5bdb}
+.pay-opt.pix .ic{background:#00a38a}.pay-opt.cred .ic{background:#3b5bdb}.pay-opt.boleto .ic{background:#2d6bc4}
+.seg{display:flex;background:#eef2f0;border-radius:12px;padding:4px;gap:4px;margin-bottom:14px}
+.seg-btn{flex:1;border:none;background:transparent;padding:9px;border-radius:9px;font-weight:700;font-size:13.5px;color:var(--muted);cursor:pointer;transition:.15s}
+.seg-btn.on{background:#fff;color:var(--p-dark);box-shadow:0 1px 4px rgba(9,50,28,.12)}
+.parcel-list{max-height:190px;overflow:auto;border:1px solid #e2e8e4;border-radius:12px;margin-bottom:14px}
+.parc-opt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:#fff;border:none;border-bottom:1px solid #eef2f0;padding:11px 14px;cursor:pointer;color:var(--txt);text-align:left}
+.parc-opt:last-child{border-bottom:none}
+.parc-opt b{font-size:13.5px}
+.parc-opt span{font-size:11.5px;color:var(--muted)}
+.parc-opt.sel{background:var(--p-soft)}
+.parc-opt.sel b,.parc-opt.sel span{color:var(--p-dark)}
 .pay-opt b{font-size:15.5px;display:block}
 .pay-opt span{font-size:12.5px;color:var(--muted)}
 .pay-opt .arrow{margin-left:auto;color:#b6c2bb}
@@ -229,6 +265,7 @@ input{font-family:inherit}
   word-break:break-all;font-family:monospace;margin-bottom:14px;
 }
 .copy-btn{flex-shrink:0}
+.boleto-code{background:#f2f6f4;border:1px dashed #b9cfc4;border-radius:12px;padding:14px;font-family:monospace;font-size:12px;letter-spacing:1.2px;word-break:break-all;color:var(--txt);line-height:1.55;margin-bottom:14px;user-select:all}
 .timer{
   text-align:center;font-size:13px;color:var(--muted);margin-bottom:14px;font-variant-numeric:tabular-nums;
 }
@@ -249,6 +286,9 @@ input{font-family:inherit}
 }
 .tx-ic.pix{background:#dcf3ee;color:#00806e}
 .tx-ic.cred{background:#e7ecfc;color:#3b5bdb}
+.tx-ic.deb{background:#e7f0e9;color:#2f7d3f}
+.tx-ic.boleto{background:#eaf1fb;color:#2d6bc4}
+.tx-ic.senha{background:#fdf1dc;color:#b07d0c}
 .tx-info{flex:1;min-width:0}
 .tx-info b{font-size:14px;display:block}
 .tx-info span{font-size:12px;color:var(--muted)}
@@ -385,6 +425,7 @@ input{font-family:inherit}
     padding:22px 22px calc(26px + env(safe-area-inset-bottom));animation:up .3s ease;
   }
   @keyframes up{from{transform:translateY(60px);opacity:.4}to{transform:none;opacity:1}}
+  .site-footer{padding:4px 18px 24px;max-width:none}
 }
 
 .map-wrap{display:flex;flex-direction:column;gap:16px;height:calc(100vh - 180px);min-height:400px}
@@ -394,6 +435,23 @@ input{font-family:inherit}
   background:#fff;font-size:15px;font-weight:600;color:var(--txt);outline:none;appearance:auto;
 }
 .map-top select:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--p-soft)}
+.map-search{display:none}
+.map-search-row{display:flex;gap:8px}
+.map-search input{
+  flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1.5px solid #dbe3de;
+  background:#fff;font-size:15px;color:var(--txt);outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.map-search input:focus{border-color:var(--p);box-shadow:0 0 0 3px var(--p-soft)}
+.map-search button{
+  flex-shrink:0;padding:0 18px;border-radius:12px;border:none;background:var(--p);color:#fff;
+  font-size:15px;font-weight:700;cursor:pointer;transition:background .15s;
+}
+.map-search button:hover{background:var(--p-dark)}
+.map-search button:disabled{opacity:.5;cursor:default}
+.map-search-msg{font-size:12px;color:var(--p-dark);min-height:15px}
+@media (min-width:768px){
+  .map-search{display:flex;flex-direction:column;gap:6px;flex:1 1 100%;min-width:0}
+}
 #bus-map{flex:1;border-radius:var(--radius);overflow:hidden;min-height:280px;box-shadow:0 4px 14px rgba(9,50,28,.08)}
 .map-panel{
   background:#fff;border-radius:var(--radius);box-shadow:0 4px 14px rgba(9,50,28,.06);
@@ -460,6 +518,8 @@ input{font-family:inherit}
 .bus-popup b{color:var(--p-dark)}
 .bus-popup .pop-time{font-weight:800;color:var(--p);font-size:15px}
 .bus-popup .pop-addr{color:var(--muted);font-size:12px}
+
+.bus-popup .bus-here{border-top:1px solid #ddd;margin-top:6px;padding-top:6px;color:var(--p);font-weight:bold}
 .map-cors-note{
   text-align:center;font-size:12px;color:var(--muted);
   background:#fffbeb;border:1px solid #fde68a;border-radius:12px;
@@ -508,7 +568,6 @@ input{font-family:inherit}
       <div class="login-side">
         <form class="login-card" id="login-form" autocomplete="off">
           <h2>Entrar na conta</h2>
-          <p class="hint-sub">Simulação: qualquer login e senha criam uma conta fictícia.</p>
           <div class="error-msg" id="login-error"></div>
           <div class="field">
             <label for="in-login">Login ou e-mail</label>
@@ -520,7 +579,8 @@ input{font-family:inherit}
           </div>
           <button class="btn" type="submit">Entrar</button>
         </form>
-        <p class="sim-note">Acesso administrador: <b>admin@recargabus.com</b> · senha <b>admin123</b><br>Projeto demonstrativo. Nenhum pagamento é real e nenhum dado pessoal é coletado.</p>
+        <p class="sim-note">Acesso administrador: <b>admin@recargabus.com</b> · senha <b>admin123</b></p>
+      <footer class="login-footer">© 2026 · Desenvolvido por Sofia Tresse Pires</footer>
       </div>
     </div>
   </section>
@@ -555,7 +615,7 @@ input{font-family:inherit}
       <div class="sb-spacer"></div>
       <div class="sb-user">
         <div class="avatar" id="avatar-sb">?</div>
-        <div><b id="sb-login">—</b><span id="sb-type">Conta simulada</span></div>
+        <div><b id="sb-login">—</b><span id="sb-type">Conta RecargaBus</span></div>
         <button onclick="logout()" title="Sair da conta">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
         </button>
@@ -571,7 +631,6 @@ input{font-family:inherit}
             <p>Bem-vindo(a) de volta</p>
           </div>
           <div class="right">
-            <span class="tag-sim">SIMULAÇÃO</span>
             <div class="avatar" id="avatar">?</div>
           </div>
         </header>
@@ -596,7 +655,7 @@ input{font-family:inherit}
             </div>
           </div>
           <div class="col-b">
-            <div class="section-title">Meus cartões</div>
+            <div class="section-title"><span>Meus cartões</span><button class="add-card" onclick="openAddCard()">+ Novo cartão</button></div>
             <div id="cards-list"></div>
           </div>
         </main>
@@ -605,24 +664,27 @@ input{font-family:inherit}
       <section id="screen-recharge" class="screen">
         <header class="appbar">
           <div><h2>Recarregar</h2><p>Cada unidade custa R$ 4,50</p></div>
-          <div class="right"><span class="tag-sim">SIMULAÇÃO</span></div>
+          <div class="right"></div>
         </header>
         <main class="content">
           <div class="steps" id="steps-ind">
             <div class="step-dot on" data-step="1"></div>
             <div class="step-dot" data-step="2"></div>
             <div class="step-dot" data-step="3"></div>
+            <div class="step-dot" data-step="4"></div>
           </div>
 
           <div class="r-step" data-step="1">
             <button class="back-link" onclick="go('home')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Voltar ao início</button>
             <div class="panel" style="margin-top:10px">
-              <h3>Código do cartão</h3>
-              <p class="desc">Digite os 12 números impressos no verso do seu cartão.</p>
-              <input class="code-input" id="in-card-code" inputmode="numeric" maxlength="14" placeholder="0000 0000 0000" autocomplete="off">
-              <button type="button" class="link-btn" onclick="useDemoCard()">Usar cartão de demonstração</button>
-              <div style="margin-top:20px">
-                <button class="btn" onclick="validateCode()">Continuar</button>
+              <h3>Qual cartão deseja recarregar?</h3>
+              <p class="desc">Selecione um dos seus cartões cadastrados.</p>
+              <div id="recharge-card-list"></div>
+              <div id="recharge-empty" class="empty-state hidden"><p>Você ainda não tem cartões.<br><b>Adicione um para começar.</b></p>
+                <button class="btn small" style="margin-top:16px" onclick="openAddCard()">Adicionar cartão</button>
+              </div>
+              <div style="margin-top:16px">
+                <button class="btn" onclick="pickRechargeCard()">Continuar</button>
               </div>
             </div>
           </div>
@@ -647,15 +709,27 @@ input{font-family:inherit}
                 <div class="l"><span id="sum-detail">10 un × R$ 4,50</span></div>
                 <div class="r" id="sum-total">R$ 45,00</div>
               </div>
-              <button class="btn" onclick="rstep(3)">Escolher pagamento</button>
+              <button class="btn" onclick="goRechStep3()">Continuar</button>
             </div>
           </div>
 
           <div class="r-step hidden" data-step="3">
             <button class="back-link" onclick="rstep(2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Alterar quantidade</button>
             <div class="panel" style="margin-top:10px">
+              <h3>Confirmar com senha</h3>
+              <p class="desc">Recarga de <b id="pay-summary" style="color:var(--txt)"></b> para o cartão <b id="pay-card-code" style="color:var(--txt)"></b>. Digite a senha da sua conta para liberar o pagamento:</p>
+              <input class="code-input" id="in-senha" type="password" inputmode="text" maxlength="24" placeholder="Senha da conta" autocomplete="off">
+              <div style="margin-top:20px">
+                <button class="btn" onclick="validateSenha()">Continuar para pagamento</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="r-step hidden" data-step="4">
+            <button class="back-link" onclick="rstep(3)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Voltar à senha</button>
+            <div class="panel" style="margin-top:10px">
               <h3>Forma de pagamento</h3>
-              <p class="desc">Recarga de <b id="pay-summary" style="color:var(--txt)"></b>. Escolha como quer pagar:</p>
+              <p class="desc">Recarga de <b id="pay-summary2" style="color:var(--txt)"></b> para o cartão <b id="pay-card-code2" style="color:var(--txt)"></b>. Escolha como pagar:</p>
               <button class="pay-opt pix" onclick="openPix()">
                 <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg></span>
                 <span style="flex:1"><b>Pix</b><span>Aprovação imediata · simulação</span></span>
@@ -663,14 +737,19 @@ input{font-family:inherit}
               </button>
               <button class="pay-opt cred" onclick="openCard()">
                 <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
-                <span style="flex:1"><b>Cartão de crédito</b><span>Débito em 1× · simulação</span></span>
+                <span style="flex:1"><b>Cartão de débito/crédito</b><span>Pague em 1× · simulação</span></span>
+                <span class="arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
+              </button>
+              <button class="pay-opt boleto" onclick="openBoleto()">
+                <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8"/></svg></span>
+                <span style="flex:1"><b>Boleto bancário</b><span>Vencimento em 3 dias · simulação</span></span>
                 <span class="arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>
               </button>
               <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:6px">Nenhuma cobrança real será efetuada.</p>
             </div>
           </div>
 
-          <div class="r-step hidden" data-step="4" style="flex:1;display:none">
+          <div class="r-step hidden" data-step="5" style="flex:1;display:none">
             <div class="success-wrap">
               <svg class="check-circle" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50"/><path d="M38 62l16 15 28-32"/></svg>
               <h2>Recarga aprovada!</h2>
@@ -686,7 +765,6 @@ input{font-family:inherit}
         <header class="appbar">
           <div><h2>Extrato</h2><p>Histórico de recargas</p></div>
           <div class="right">
-            <span class="tag-sim">SIMULAÇÃO</span>
             <div class="avatar" id="avatar-ext">?</div>
           </div>
         </header>
@@ -706,6 +784,14 @@ input{font-family:inherit}
               <select id="map-line-select" onchange="selectMapLine(this.value)">
                 <option value="">— Todas as linhas —</option>
               </select>
+              <div class="map-search">
+                <div class="map-search-row">
+                  <input id="map-search-input" type="text" placeholder="Coloque o endereço da sua posição atual"
+                    onkeydown="if(event.key==='Enter'){searchAddress();return false;}" />
+                  <button id="map-search-btn" onclick="searchAddress()" title="Buscar endereço no mapa">Buscar</button>
+                </div>
+                <span class="map-search-msg" id="map-search-msg"></span>
+              </div>
             </div>
 
             <div id="bus-map"></div>
@@ -743,22 +829,18 @@ input{font-family:inherit}
       <section id="screen-perfil" class="screen">
         <header class="appbar">
           <div><h2>Perfil</h2><p>Sua conta</p></div>
-          <div class="right"><span class="tag-sim">SIMULAÇÃO</span></div>
+          <div class="right"></div>
         </header>
         <main class="content">
           <div class="profile-head">
             <div class="avatar" id="avatar-perf">?</div>
-            <div><b id="profile-login">login</b><span id="profile-type">Conta de demonstração</span></div>
+            <div><b id="profile-login">login</b><span id="profile-type">Conta RecargaBus</span></div>
           </div>
           <div style="display:flex;gap:11px">
             <div class="stat-mini"><b id="stat-units">0</b><span>unidades ativas</span></div>
             <div class="stat-mini"><b id="stat-count">0</b><span>recargas feitas</span></div>
           </div>
           <div class="menu-list">
-            <button class="menu-item" onclick="showRules()">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-              Como funciona a simulação
-            </button>
             <button class="menu-item danger" onclick="resetData()">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
               Apagar meus dados
@@ -770,6 +852,8 @@ input{font-family:inherit}
           </div>
         </main>
       </section>
+
+      <footer class="site-footer">© 2026 · Desenvolvido por Sofia Tresse Pires</footer>
 
     </div>
 
@@ -819,10 +903,19 @@ input{font-family:inherit}
   <div class="overlay" id="modal-card">
     <div class="sheet">
       <div class="sheet-head">
-        <h3>Cartão de crédito</h3>
+        <h3>Cartão de débito/crédito</h3>
         <button class="close-x" onclick="closePay()">✕</button>
       </div>
       <div class="amount-big" id="card-amount">R$ 0,00</div>
+      <div class="seg" id="card-mode">
+        <button type="button" class="seg-btn on" data-mode="deb" onclick="setCardMode('deb')">Débito</button>
+        <button type="button" class="seg-btn" data-mode="cred" onclick="setCardMode('cred')">Crédito</button>
+      </div>
+      <div id="card-deb-info" style="font-size:12.5px;color:var(--muted);margin-bottom:14px;text-align:center">Pagamento à vista em 1x de <b id="card-deb-parc" style="color:var(--txt)"></b></div>
+      <div id="parcel-block" style="display:none">
+        <label style="font-size:13px;font-weight:700;margin-bottom:8px;display:block">Escolha o parcelamento</label>
+        <div class="parcel-list" id="parcel-list"></div>
+      </div>
       <form id="card-form" autocomplete="off">
         <div class="field">
           <label for="cc-num">Número do cartão</label>
@@ -846,6 +939,50 @@ input{font-family:inherit}
         <button class="btn" type="submit" id="card-pay">Pagar agora</button>
       </form>
       <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Simulação: não insira dados reais de cartão.</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="modal-boleto">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3>Pagar com boleto</h3>
+        <button class="close-x" onclick="closePay()">✕</button>
+      </div>
+      <div class="amount-big" id="boleto-amount">R$ 0,00</div>
+      <p style="text-align:center;font-size:12.5px;color:var(--muted);margin-bottom:12px">Vencimento em <span id="boleto-venc"></span> · linha digitável:</p>
+      <div class="boleto-code" id="boleto-line"></div>
+      <button class="btn small ghost copy-btn" style="width:100%;padding:10px;margin-bottom:14px" onclick="copyBoleto()">Copiar linha digitável</button>
+      <button class="btn" id="boleto-confirm" onclick="confirmBoleto()">Já paguei — confirmar</button>
+      <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">Simulação: nenhum boleto real é gerado ou cobrado.</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="modal-addcard">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h3>Adicionar novo cartão</h3>
+        <button class="close-x" onclick="closeAddCard()">✕</button>
+      </div>
+      <form id="addcard-form" autocomplete="off">
+        <div class="field">
+          <label for="ac-num">Número do cartão</label>
+          <input id="ac-num" inputmode="numeric" maxlength="14" placeholder="0000 0000 0000" required>
+        </div>
+        <div class="field">
+          <label for="ac-type">Tipo de cartão</label>
+          <select id="ac-type" onchange="updateAddCardLabel()">
+            <option value="comum">Comum / Normal</option>
+            <option value="estudante">Estudante</option>
+            <option value="idoso">Idoso</option>
+          </select>
+        </div>
+        <div class="field" id="ac-pdf-field">
+          <label id="ac-pdf-label" for="ac-pdf">Anexar documento (PDF)</label>
+          <input id="ac-pdf" type="file" accept="application/pdf,.pdf">
+        </div>
+        <div class="error-msg" id="addcard-error"></div>
+        <button class="btn" type="submit">Salvar cartão</button>
+      </form>
     </div>
   </div>
 
@@ -909,6 +1046,7 @@ $("login-form").addEventListener("submit", e => {
     if (pass.length < 4) return showLoginError("A senha precisa ter pelo menos 4 caracteres.");
     if (!db.users[login]) db.users[login] = { cards: {}, tx: [] };
   }
+  db.users[login].pass = pass;
   save();
   loginAs(login);
 });
@@ -968,8 +1106,8 @@ function renderAll() {
   ["avatar", "avatar-ext", "avatar-perf", "avatar-sb"].forEach(id => $(id).textContent = first.charAt(0));
   $("profile-login").textContent = session;
   $("sb-login").textContent = session;
-  $("sb-type").textContent = u.isAdmin ? "Administrador" : "Conta simulada";
-  $("profile-type").textContent = u.isAdmin ? "Conta administradora" : "Conta de demonstração";
+  $("sb-type").textContent = u.isAdmin ? "Administrador" : "Conta RecargaBus";
+  $("profile-type").textContent = u.isAdmin ? "Conta administradora" : "Conta RecargaBus";
 
   const tot = totalUnits(u);
   $("total-units").innerHTML = tot + " <small>un.</small>";
@@ -985,11 +1123,17 @@ function renderAll() {
       '<p>Nenhum cartão por aqui ainda.<br><b>Faça sua primeira recarga!</b></p>' +
       '<button class="btn small" style="margin-top:16px" onclick="startRecharge()">Recarregar agora</button></div>';
   } else {
-    list.innerHTML = codes.map(c =>
-      '<div class="card-item"><div><div class="code">' + fmtCode(c) +
-      '</div><div class="sub">Cartão cadastrado</div></div>' +
-      '<div class="units-pill">' + u.cards[c] + ' un.</div></div>'
-    ).join("");
+    list.innerHTML = codes.map(c => {
+      const meta = (u.cardMeta && u.cardMeta[c]) || {};
+      const type = meta.type === "estudante" ? "estudante" : meta.type === "idoso" ? "idoso" : "comum";
+      const label = type === "estudante" ? "Estudante" : type === "idoso" ? "Idoso" : "Comum";
+      return '<div class="card-item">' +
+        '<img class="card-img" src="cards/' + type + '.jpg" alt="Cartão ' + label + '">' +
+        '<div class="card-mid"><div class="card-type">' + label + '</div>' +
+        '<div class="code">' + fmtCode(c) + '</div>' +
+        (meta.doc ? '<div class="sub">' + meta.doc + '</div>' : '') +
+        '</div><div class="units-pill">' + u.cards[c] + ' un.</div></div>';
+    }).join("");
   }
 
   const tl = $("tx-list");
@@ -998,8 +1142,12 @@ function renderAll() {
   } else {
     tl.innerHTML = u.tx.map(t => {
       const d = new Date(t.date).toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
-      const label = t.method === "pix" ? "Pix" : "Crédito";
-      return '<div class="tx-item"><div class="tx-ic ' + t.method + '">' + (t.method === "pix" ? "P" : "C") +
+      const label = t.method === "pix" ? "Pix"
+        : t.method === "boleto" ? "Boleto"
+        : t.method === "deb" ? "Débito"
+        : "Crédito" + (t.parcelas > 1 ? " · " + t.parcelas + "x" : "");
+      return '<div class="tx-item"><div class="tx-ic ' + t.method + '">' +
+        (t.method === "pix" ? "P" : t.method === "boleto" ? "B" : t.method === "deb" ? "D" : "C") +
         '</div><div class="tx-info"><b>+ ' + t.qty + ' unidades</b>' +
         '<span>' + label + " · " + fmtCode(t.code) + "</span>" +
         '<div class="status-ok">Aprovada · ' + d + '</div></div>' +
@@ -1010,48 +1158,81 @@ function renderAll() {
 
 function startRecharge() {
   cur = { code: "", qty: 10, method: "" };
-  $("in-card-code").value = "";
+  renderRechargeCards();
   setQty(10);
+  $("in-senha").value = "";
   rstep(1);
   go("recharge");
+}
+
+function renderRechargeCards() {
+  const u = user();
+  const codes = Object.keys(u.cards);
+  $("recharge-empty").classList.toggle("hidden", codes.length > 0);
+  if (!codes.length) {
+    $("recharge-card-list").innerHTML = "";
+    cur.code = "";
+    return;
+  }
+  if (!u.cards[cur.code]) cur.code = codes[0];
+  $("recharge-card-list").innerHTML = codes.map(c => {
+    const meta = (u.cardMeta && u.cardMeta[c]) || {};
+    const type = meta.type === "estudante" ? "estudante" : meta.type === "idoso" ? "idoso" : "comum";
+    const label = type === "estudante" ? "Estudante" : type === "idoso" ? "Idoso" : "Comum";
+    return '<div class="pick-card' + (c === cur.code ? " sel" : "") + '" data-code="' + c + '" onclick="selectRechargeCard(this)">' +
+      '<img class="card-img" src="cards/' + type + '.jpg" alt="Cartão ' + label + '">' +
+      '<div class="card-mid"><div class="card-type">' + label + '</div>' +
+      '<div class="code">' + fmtCode(c) + '</div></div>' +
+      '<div class="units-pill">' + u.cards[c] + ' un.</div>' +
+      '<span class="radio-pick' + (c === cur.code ? " on" : "") + '"></span></div>';
+  }).join("");
+}
+
+function selectRechargeCard(el) {
+  document.querySelectorAll(".pick-card").forEach(x => {
+    x.classList.remove("sel");
+    x.querySelector(".radio-pick").classList.remove("on");
+  });
+  el.classList.add("sel");
+  el.querySelector(".radio-pick").classList.add("on");
+  cur.code = el.dataset.code;
+}
+
+function pickRechargeCard() {
+  if (!cur.code) { toast("Selecione um cartão para continuar"); return; }
+  $("qty-card-code").textContent = fmtCode(cur.code);
+  setQty(cur.qty);
+  rstep(2);
+}
+
+$("in-senha").addEventListener("keydown", e => {
+  if (e.key === "Enter") { e.preventDefault(); validateSenha(); }
+});
+
+function validateSenha() {
+  const u = user();
+  const pass = $("in-senha").value;
+  if (pass.length < 4) { toast("Informe a senha da conta"); $("in-senha").focus(); return; }
+  if (u.pass && u.pass !== pass) {
+    toast("Senha incorreta");
+    $("in-senha").value = "";
+    $("in-senha").focus();
+    return;
+  }
+  if (!u.pass) { u.pass = pass; save(); }
+  rstep(4);
 }
 
 function rstep(n) {
   document.querySelectorAll(".r-step").forEach(s => {
     const on = Number(s.dataset.step) === n;
     s.classList.toggle("hidden", !on);
-    s.style.display = on ? (n === 4 ? "flex" : "block") : "none";
+    s.style.display = on ? (n === 5 ? "flex" : "block") : "none";
   });
   document.querySelectorAll(".step-dot").forEach(d =>
-    d.classList.toggle("on", Number(d.dataset.step) <= Math.min(n, 3))
+    d.classList.toggle("on", Number(d.dataset.step) <= Math.min(n, 4))
   );
-  $("steps-ind").style.visibility = n >= 4 ? "hidden" : "visible";
-}
-
-$("in-card-code").addEventListener("input", e => {
-  let v = e.target.value.replace(/\D/g, "").slice(0, 12);
-  e.target.value = v.replace(/(\d{4})(?=\d)/g, "$1 ");
-});
-$("in-card-code").addEventListener("keydown", e => {
-  if (e.key === "Enter") { e.preventDefault(); validateCode(); }
-});
-
-function useDemoCard() {
-  $("in-card-code").value = "4815 1299 0037";
-  validateCode();
-}
-
-function validateCode() {
-  const digits = $("in-card-code").value.replace(/\D/g, "");
-  if (digits.length !== 12) {
-    toast("O código deve ter exatamente 12 números");
-    $("in-card-code").focus();
-    return;
-  }
-  cur.code = digits;
-  $("qty-card-code").textContent = fmtCode(digits);
-  setQty(cur.qty);
-  rstep(2);
+  $("steps-ind").style.visibility = n >= 5 ? "hidden" : "visible";
 }
 
 function chQty(delta) { setQty(Math.min(40, Math.max(1, cur.qty + delta))); }
@@ -1065,10 +1246,16 @@ function setQty(q) {
   $("sum-total").textContent = fmt(q * PRECO);
 }
 
+function goRechStep3() {
+  $("pay-summary").textContent = cur.qty + " unidades (" + fmt(cur.qty * PRECO) + ")";
+  $("pay-card-code").textContent = fmtCode(cur.code);
+  rstep(3);
+}
+
 function openPayment(method) {
   cur.method = method;
-  const total = cur.qty * PRECO;
-  $("pay-summary").textContent = cur.qty + " unidades (" + fmt(total) + ")";
+  $("pay-summary2").textContent = cur.qty + " unidades (" + fmt(cur.qty * PRECO) + ")";
+  $("pay-card-code2").textContent = fmtCode(cur.code);
 }
 
 function openPix() {
@@ -1128,13 +1315,92 @@ function confirmPix() {
   }, 1800);
 }
 
+function openBoleto() {
+  openPayment("boleto");
+  $("boleto-amount").textContent = fmt(cur.qty * PRECO);
+  const venc = new Date();
+  venc.setDate(venc.getDate() + 3);
+  $("boleto-venc").textContent = venc.toLocaleDateString("pt-BR");
+  let line = "23793.90510 12345.670021 90000.104000 8 12345678901234";
+  $("boleto-line").textContent = line;
+  $("boleto-confirm").disabled = false;
+  $("boleto-confirm").innerHTML = "Já paguei — confirmar";
+  $("modal-boleto").classList.add("show");
+}
+
+function copyBoleto() {
+  const v = $("boleto-line").textContent.replace(/\s+/g, "");
+  if (navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(v).catch(() => {});
+  toast("Linha digitável copiada");
+}
+
+function confirmBoleto() {
+  const btn = $("boleto-confirm");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>&nbsp;Validando pagamento…';
+  setTimeout(() => approve("boleto"), 1800);
+}
+
+const JUROS_CARTAO = 0.0249;
+let cardMode = "deb";
+let cardParcel = 1;
+
 function openCard() {
   openPayment("cred");
-  $("card-amount").textContent = fmt(cur.qty * PRECO);
+  cardMode = "deb";
+  cardParcel = 1;
   $("card-error").classList.remove("show");
   $("card-pay").disabled = false;
   $("card-pay").textContent = "Pagar agora";
+  setCardMode("deb");
   $("modal-card").classList.add("show");
+}
+
+function pricePmt(base, n) {
+  if (n <= 3) return [base / n, base];
+  const parc = base * JUROS_CARTAO / (1 - Math.pow(1 + JUROS_CARTAO, -n));
+  return [Math.round(parc * 100) / 100, Math.round(parc * n * 100) / 100];
+}
+
+function setCardMode(m) {
+  cardMode = m;
+  document.querySelectorAll("#card-mode .seg-btn").forEach(b =>
+    b.classList.toggle("on", b.dataset.mode === m));
+  const deb = $("card-deb-info");
+  const parc = $("parcel-block");
+  if (m === "cred") {
+    parc.style.display = "";
+    deb.style.display = "none";
+    renderParcelas();
+  } else {
+    parc.style.display = "none";
+    deb.style.display = "";
+    const base = cur.qty * PRECO;
+    $("card-deb-parc").textContent = fmt(base);
+  }
+  updateCardAmount();
+}
+
+function renderParcelas() {
+  const base = cur.qty * PRECO;
+  const list = $("parcel-list");
+  list.innerHTML = "";
+  for (let n = 1; n <= 12; n++) {
+    const [parc, total] = pricePmt(base, n);
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "parc-opt" + (n === cardParcel ? " sel" : "");
+    el.innerHTML = "<b>" + n + "x de " + fmt(parc) + "</b>" +
+      "<span>Total " + fmt(total) + (n > 3 ? " · juros 2,49% a.m." : " · sem juros") + "</span>";
+    el.onclick = () => { cardParcel = n; renderParcelas(); updateCardAmount(); };
+    list.appendChild(el);
+  }
+}
+
+function updateCardAmount() {
+  const base = cur.qty * PRECO;
+  $("card-amount").textContent = fmt(cardMode === "cred" ? pricePmt(base, cardParcel)[1] : base);
 }
 
 $("cc-num").addEventListener("input", e => {
@@ -1169,16 +1435,18 @@ $("card-form").addEventListener("submit", e => {
   const btn = $("card-pay");
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>&nbsp;Processando…';
-  setTimeout(() => approve("cred"), 2000);
+  const [parc, total] = pricePmt(cur.qty * PRECO, cardMode === "deb" ? 1 : cardParcel);
+  setTimeout(() => approve(cardMode === "deb" ? "deb" : "cred", total, cardMode === "deb" ? 1 : cardParcel, parc), 2000);
 });
 
 function closePay() {
   $("modal-pix").classList.remove("show");
   $("modal-card").classList.remove("show");
+  $("modal-boleto").classList.remove("show");
   clearInterval(pixTimer);
 }
 
-function approve(method) {
+function approve(method, total = +(cur.qty * PRECO).toFixed(2), parcelas = 1, parcelaVal = 0) {
   const u = user();
   u.cards[cur.code] = (u.cards[cur.code] || 0) + cur.qty;
   u.tx.unshift({
@@ -1186,33 +1454,103 @@ function approve(method) {
     code: cur.code,
     qty: cur.qty,
     method,
-    total: +(cur.qty * PRECO).toFixed(2),
+    parcelas,
+    total,
     status: "Aprovada"
   });
   save();
-  const total = fmt(cur.qty * PRECO);
   $("receipt").innerHTML =
     row("Cartão", fmtCode(cur.code)) +
     row("Unidades", "+" + cur.qty + " un.") +
-    row("Pagamento", method === "pix" ? "Pix" : "Cartão de crédito") +
-    row("Total", "<span style='color:var(--p-dark)'>" + total + "</span>") +
+    row("Pagamento", payLabel(method, parcelas, parcelaVal)) +
+    row("Total", "<span style='color:var(--p-dark)'>" + fmt(total) + "</span>") +
     row("Status", "<span class='status-ok'>Aprovada (simulada)</span>");
   closePay();
-  rstep(4);
+  rstep(5);
   function row(k, v) { return '<div class="row"><span>' + k + "</span><b>" + v + "</b></div>"; }
+}
+
+function payLabel(method, parcelas, parcelaVal) {
+  if (method === "pix") return "Pix";
+  if (method === "boleto") return "Boleto bancário";
+  if (method === "deb") return "Cartão de débito";
+  return parcelas > 1
+    ? "Cartão de crédito · " + parcelas + "x de " + fmt(parcelaVal)
+    : "Cartão de crédito";
 }
 
 function finishRecharge() {
   go("home");
 }
 
-["modal-pix", "modal-card"].forEach(id => {
+const CARD_TYPES = {
+  comum: { label: "Comum", img: "cards/comum.jpg" },
+  estudante: { label: "Estudante", img: "cards/estudante.jpg" },
+  idoso: { label: "Idoso", img: "cards/idoso.jpg" }
+};
+
+function openAddCard() {
+  $("ac-num").value = "";
+  $("ac-type").value = "comum";
+  $("ac-pdf").value = "";
+  updateAddCardLabel();
+  $("addcard-error").classList.remove("show");
+  $("modal-addcard").classList.add("show");
+  setTimeout(() => $("ac-num").focus(), 80);
+}
+
+function closeAddCard() {
+  $("modal-addcard").classList.remove("show");
+}
+
+function updateAddCardLabel() {
+  const t = $("ac-type").value;
+  const field = $("ac-pdf-field");
+  const file = $("ac-pdf");
+  if (t === "comum") {
+    field.style.display = "none";
+    file.removeAttribute("required");
+  } else {
+    field.style.display = "";
+    file.setAttribute("required", "required");
+    $("ac-pdf-label").textContent =
+      t === "estudante" ? "Anexar Histórico Escolar (PDF)" : "Anexar Comprovante / Doc. Idoso (PDF)";
+  }
+}
+
+$("addcard-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const u = user();
+  if (!u) return;
+  const err = $("addcard-error");
+  err.classList.remove("show");
+  const fail = m => { err.textContent = m; err.classList.add("show"); };
+  const code = $("ac-num").value.replace(/\D/g, "").slice(0, 12);
+  if (code.length !== 12) return fail("O número do cartão deve ter 12 dígitos.");
+  const type = $("ac-type").value;
+  const file = $("ac-pdf").files[0];
+  if (!CARD_TYPES[type]) return fail("Tipo de cartão inválido.");
+  if (file && !/\.pdf$/i.test(file.name)) return fail("Apenas arquivos PDF são aceitos.");
+  if (type !== "comum" && !file)
+    return fail(type === "estudante" ? "Anexe o histórico escolar em PDF." : "Anexe o comprovante do idoso em PDF.");
+  if (!u.cards[code]) u.cards[code] = 0;
+  if (!u.cardMeta) u.cardMeta = {};
+  u.cardMeta[code] = { type: type, doc: file ? file.name : "" };
+  save();
+  closeAddCard();
+  renderAll();
+  renderRechargeCards();
+  toast("Cartão " + fmtCode(code) + " (" + CARD_TYPES[type].label + ") adicionado");
+});
+
+["modal-pix", "modal-card", "modal-boleto"].forEach(id => {
   $(id).addEventListener("click", e => { if (e.target === $(id)) closePay(); });
 });
-document.addEventListener("keydown", e => { if (e.key === "Escape") closePay(); });
+$("modal-addcard").addEventListener("click", e => { if (e.target === $("modal-addcard")) closeAddCard(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") { closePay(); closeAddCard(); } });
 
 function resetData() {
-  if (!confirm("Apagar todos os seus cartões e histórico desta simulação?")) return;
+  if (!confirm("Apagar todos os seus cartões e histórico?")) return;
   db.users[session] = { cards: {}, tx: [], isAdmin: user().isAdmin };
   save();
   renderAll();
@@ -1221,11 +1559,11 @@ function resetData() {
 
 function showRules() {
   alert(
-    "Isto é uma SIMULAÇÃO para fins de demonstração.\n\n" +
-    "- Login: qualquer login e senha (4+ caracteres) criam uma conta fictícia local.\n" +
-    "- Cartões, unidades, Pix e pagamentos são fictícios.\n" +
-    "- Os dados ficam salvos apenas no seu navegador (localStorage).\n" +
-    "- Nenhuma cobrança real é feita."
+    "Carregue seu cartão e acompanhe tudo em um só lugar.\n\n" +
+    "- Crie sua conta com um login e senha.\n" +
+    "- Adicione seus cartões e escolha a quantidade de unidades.\n" +
+    "- Pague com Pix, cartão de débito/crédito ou boleto.\n" +
+    "- Os dados ficam salvos apenas no seu navegador (localStorage)."
   );
 }
 
@@ -1308,6 +1646,11 @@ let lastUpdate = null;
 let mapReqSeq = 0;
 let userMarker = null;
 let userWatchId = null;
+let currentStops = [];
+let userCoords = null;
+let userAddress = "";
+let userAccuracy = Infinity;
+let lastGeocodeTs = 0;
 
 function mapRetry() {
   loadMapLine(selectedLineCode);
@@ -1347,19 +1690,34 @@ function buildMap() {
 
 function startUserTracking() {
   if (!("geolocation" in navigator) || userWatchId !== null || !mapObj) return;
+  userAccuracy = Infinity;
   userWatchId = navigator.geolocation.watchPosition(
     function (pos) {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      const first = !userMarker;
-      if (userMarker) { mapObj.removeLayer(userMarker); userMarker = null; }
-      userMarker = L.circleMarker([lat, lng], {
+      if (!mapObj) return;
+      const acc = pos.coords.accuracy;
+      if (acc >= userAccuracy) return;
+      const first = userAccuracy === Infinity;
+      const rlat = pos.coords.latitude;
+      const rlng = pos.coords.longitude;
+      userAccuracy = acc;
+      userCoords = { lat: rlat, lng: rlng };
+      if (userMarker) mapObj.removeLayer(userMarker);
+      userMarker = L.circleMarker([rlat, rlng], {
         radius: 9, color: "#fff", weight: 2, fillColor: "#dc2626", fillOpacity: .95
-      }).addTo(mapObj).bindPopup('<div class="bus-popup"><b>Você está aqui</b></div>');
+      }).addTo(mapObj).bindPopup('<div class="bus-popup"><b>📍 Você está aqui</b></div>');
+      refreshUserMarkerPopup();
+      if (first || Date.now() - lastGeocodeTs > 2000) {
+        lastGeocodeTs = Date.now();
+        reverseGeocode(rlat, rlng, function (addr) {
+          if (!mapObj || !userCoords || userCoords.lat !== rlat || userCoords.lng !== rlng) return;
+          userAddress = addr;
+          refreshUserMarkerPopup();
+        });
+      }
       if (first) userMarker.openPopup();
     },
-    function () {},
-    { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
+    function () { userWatchId = null; },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
   );
 }
 
@@ -1368,7 +1726,100 @@ function stopUserTracking() {
     navigator.geolocation.clearWatch(userWatchId);
     userWatchId = null;
   }
+  userCoords = null;
+  userAccuracy = Infinity;
+  userAddress = "";
+  lastGeocodeTs = 0;
   if (userMarker && mapObj) { mapObj.removeLayer(userMarker); userMarker = null; }
+}
+
+function haversineDist(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const rad = a => a * Math.PI / 180;
+  const dLat = rad(lat2 - lat1);
+  const dLng = rad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function formatDistM(m) {
+  return m > 1000 ? (m / 1000).toFixed(1) + " km" : Math.round(m) + " m";
+}
+
+function nearestStop(lat, lng) {
+  let best = null;
+  let min = Infinity;
+  currentStops.forEach(st => {
+    const d = haversineDist(lat, lng, st.lat, st.lng);
+    if (d < min) { min = d; best = st; }
+  });
+  return best ? { name: best.name, dist: min } : null;
+}
+
+function reverseGeocode(lat, lng, cb) {
+  fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&accept-language=pt-BR&lat=" + lat + "&lon=" + lng)
+    .then(r => r.json())
+    .then(d => cb(d && d.display_name ? d.display_name : "Endereço não identificado"))
+    .catch(() => cb("Endereço não identificado"));
+}
+
+function refreshUserMarkerPopup() {
+  if (!userMarker || !userCoords) return;
+  const near = nearestStop(userCoords.lat, userCoords.lng);
+  const end = userAddress || "Obtendo endereço…";
+  const stopLabel = near ? near.name : "Nenhum ponto próximo";
+  const distLabel = near ? formatDistM(near.dist) : "—";
+  const html =
+    '<div class="bus-popup" style="min-width:200px"><b>📍 Você está aqui</b>' +
+    '<div style="font-size:12px;color:#333">' + end + "</div>" +
+    '<hr style="margin:6px 0;border:0;border-top:1px solid #ccc">' +
+    '<div class="pop-addr"><b>Ponto mais próximo:</b><br>' + stopLabel + " (" + distLabel + ")</div></div>";
+  userMarker.bindPopup(html);
+}
+
+function showMapSearchStatus(msg) {
+  const el = $("map-search-msg");
+  if (!el) return;
+  el.textContent = msg || "";
+  if (msg) setTimeout(() => { if (el.textContent === msg) el.textContent = ""; }, 6000);
+}
+
+function searchAddress() {
+  const input = $("map-search-input");
+  const q = input ? input.value.trim() : "";
+  if (!q) return;
+  const btn = $("map-search-btn");
+  if (btn) btn.disabled = true;
+  const qGeoCoded = encodeURIComponent(q + ", Uberaba, MG");
+  const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=pt-BR" +
+    "&countrycodes=br&viewbox=-48.05,-19.65,-47.85,-19.85&bounded=1&q=" + qGeoCoded;
+  fetch(url)
+    .then(r => r.json())
+    .then(function (res) {
+      if (!res || !res.length) throw new Error("endereco-nao-encontrado");
+      const lat = parseFloat(res[0].lat);
+      const lng = parseFloat(res[0].lon);
+      setUserLocation(lat, lng, res[0].display_name || q);
+    })
+    .catch(function () {
+      showMapSearchStatus("Endereço não encontrado. Tente outro termo.");
+    })
+    .finally(function () { if (btn) btn.disabled = false; });
+}
+
+function setUserLocation(lat, lng, label) {
+  if (!mapObj) return;
+  userCoords = { lat: lat, lng: lng };
+  userAccuracy = 0;
+  userAddress = label || "";
+  if (userMarker) mapObj.removeLayer(userMarker);
+  userMarker = L.circleMarker([lat, lng], {
+    radius: 9, color: "#fff", weight: 2, fillColor: "#dc2626", fillOpacity: .95
+  }).addTo(mapObj).bindPopup('<div class="bus-popup"><b>📍 Você está aqui</b></div>');
+  refreshUserMarkerPopup();
+  if (userMarker) userMarker.openPopup();
+  mapObj.setView([lat, lng], Math.max(mapObj.getZoom(), 14));
 }
 
 function startMapPolling() {
@@ -1445,11 +1896,13 @@ function renderAllTerminals() {
         radius: 12, color: "#fff", weight: 2, fillColor: "#f59e0b", fillOpacity: .95
       }).addTo(mapObj).bindPopup('<div class="bus-popup"><b>' + t.name + "</b><br>Clique para escolher uma linha e ver as chegadas.</div>");
       stopMarkers.push(m);
+      currentStops.push({ name: t.name, lat: t.lat, lng: t.lng });
     });
   }
   document.getElementById("map-panel-content").innerHTML =
     '<div class="map-status">Selecione uma linha acima para ver os pontos de parada e os tempos de chegada previstos, com atualização automática a cada 20s.</div>';
   $("map-refresh-info").textContent = "Escolha uma linha para começar";
+  refreshUserMarkerPopup();
 }
 
 function showMapLoading() {
@@ -1546,15 +1999,36 @@ function renderMapData(data, fitBounds) {
 
   clearMapOverlays();
 
+  /* Posição única do ônibus:
+     - Quando vários pontos reportam "agora" (tempo restante zerado), apenas o
+       PRIMEIRO deles na sequência da rota é destacado como localização atual.
+     - Os demais pontos "agora" continuam como marcadores normais da rota.
+     - Se nenhum ponto estiver "agora", destaca o de menor tempo restante. */
+  let busStopKey = null;
+  let busStopMins = Infinity;
   data.dirs.forEach((stops, dirIdx) => {
-    const dirColor = dirIdx === 0 ? "#16a34a" : "#2563eb";
-    const pts = stops.map((s, i) => geocodeStop(s.name, i + dirIdx * 100));
-    if (mapObj) {
-      linePaths.push(L.polyline(pts, { color: dirColor, weight: 3, opacity: .5 }).addTo(mapObj));
+    for (let i = 0; i < stops.length && busStopKey === null; i++) {
+      const minsLeft = Math.max(0, parseMins(stops[i].time) - nowMinOfDay());
+      if (minsLeft === 0) busStopKey = dirIdx + ":" + i;
+      else if (minsLeft < busStopMins) busStopMins = minsLeft;
     }
+  });
+  if (busStopKey === null) {
+    data.dirs.forEach((stops, dirIdx) => {
+      stops.forEach((s, i) => {
+        const minsLeft = Math.max(0, parseMins(s.time) - nowMinOfDay());
+        if (minsLeft === busStopMins) busStopKey = dirIdx + ":" + i;
+      });
+    });
+  }
+
+  data.dirs.forEach((stops, dirIdx) => {
+    const pts = stops.map((s, i) => geocodeStop(s.name, i + dirIdx * 100));
+    /* Linhas (L.polyline) entre os pontos foram removidas: apenas marcadores visíveis */
     stops.forEach((s, i) => {
       const p = pts[i];
       const minsLeft = Math.max(0, parseMins(s.time) - nowMinOfDay());
+      const isBusHere = busStopKey === dirIdx + ":" + i;
       let cls = "late";
       if (minsLeft >= 0 && minsLeft <= 2) cls = "soon";
       else if (minsLeft < 10) cls = "mid";
@@ -1563,16 +2037,20 @@ function renderMapData(data, fitBounds) {
       const popup =
         '<div class="bus-popup"><b>Linha ' + (selectedLineCode || "—") + "</b>" +
         '<div class="pop-time">' + (minsLeft >= 0 ? "em " + minsLeft + " min" : s.time) + "</div>" +
-        "<div>" + s.name + '</div><div class="pop-addr">Chegada prevista às ' + s.time + "</div></div>";
+        "<div>" + s.name + '</div><div class="pop-addr">Chegada prevista às ' + s.time + "</div>" +
+        (isBusHere ? '<div class="bus-here">🚌 O Ônibus está aqui</div>' : "") +
+        "</div>";
       const marker = L.circleMarker(p, {
-        radius: MarkerRadius(minsLeft, jitter),
-        color: "#fff",
-        weight: 2,
-        fillColor: markerColor,
-        fillOpacity: .9
+        radius: isBusHere ? 11 : MarkerRadius(minsLeft, jitter),
+        color: isBusHere ? "#00FF00" : "#fff",
+        weight: isBusHere ? 3 : 2,
+        fillColor: isBusHere ? "#28a745" : markerColor,
+        fillOpacity: isBusHere ? .95 : .9
       }).addTo(mapObj).bindPopup(popup);
       marker.on("mouseover", e => e.target.openPopup());
+      if (isBusHere) marker.openPopup();
       stopMarkers.push(marker);
+      currentStops.push({ name: s.name, lat: p.lat, lng: p.lng });
     });
   });
 
@@ -1587,12 +2065,16 @@ function renderMapData(data, fitBounds) {
       "<div><h4><span class='dir-dot " + (idx === 0 ? "a" : "b") + "'></span> " +
       (idx === 0 ? "Ida" : "Volta") + "</h4>" +
       stops.map((s, i) => {
-        const minsLeft = Math.max(0, parseMins(s.time) - nowMinOfDay());
+        const raw = parseMins(s.time) - nowMinOfDay();
+        const minsLeft = Math.max(0, raw);
+        const isBusHere = (idx + ":" + i) === busStopKey;
         let cls = "late";
-        if (minsLeft >= 0 && minsLeft <= 2) cls = "soon";
+        if (isBusHere) cls = "soon";
+        else if (raw < 0) cls = "late";
+        else if (minsLeft <= 2) cls = "soon";
         else if (minsLeft < 10) cls = "mid";
-        const when = minsLeft <= 2 ? "agora" : minsLeft + " min";
-        return '<div class="stop-row"><span class="stop-dot' + (minsLeft <= 2 ? " active" : "") + '"></span>' +
+        const when = isBusHere ? "agora" : (raw < 0 ? s.time : minsLeft + " min");
+        return '<div class="stop-row"><span class="stop-dot' + (isBusHere ? " active" : "") + '"></span>' +
           '<span class="stop-name">' + s.name + '</span>' +
           '<span class="stop-time ' + cls + '">' + when + '</span></div>';
       }).join("") + "</div>"
@@ -1602,6 +2084,7 @@ function renderMapData(data, fitBounds) {
   $("map-refresh-info").textContent = lastUpdate
     ? "Atualizado " + lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " · a cada 20s"
     : "Atualizando a cada 20s";
+  refreshUserMarkerPopup();
 }
 
 function MarkerRadius(minsLeft, seed) {
@@ -1615,6 +2098,7 @@ function clearMapOverlays() {
   stopMarkers = [];
   linePaths.forEach(l => mapObj && mapObj.removeLayer(l));
   linePaths = [];
+  currentStops = [];
 }
 
 function nowMinOfDay() {
