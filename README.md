@@ -24,34 +24,38 @@ Aplicação web de recarga de cartão de **transporte público** para Uberaba/MG
 ## Estrutura
 
 ```
-index.html          Aplicação completa (HTML + CSS + JS, arquivo único)
+index.html          Estrutura HTML (uma página por tela)
+css/style.css       Estilos (toda a apresentação visual)
+js/app.js           Lógica da aplicação (login, cartões, recarga, mapa, extrato)
 src/index.js        Worker Cloudflare (proxy CORS da Auttran + assets estáticos)
 wrangler.toml       Configuração do Worker (assets estáticos em "public")
-public/index.html   Cópia servida do index.html
-public/cards/       Imagens dos cartões (comum.jpg, estudante.jpg, idoso.jpg)
-cards/              Cópia das imagens para preview local do index.html da raiz
+public/             Cópia servida ao público (index.html + css/ + js/ + cards/)
+cards/              Imagens dos cartões (comum.jpg, estudante.jpg, idoso.jpg)
 README.md           Este arquivo
 ```
 
+As páginas usam caminhos **relativos** (`css/style.css`, `js/app.js` e `cards/*.jpg`), então funcionam tanto no site quanto abrindo o `index.html` localmente (basta as pastas `css/`, `js/` e `cards/` estarem ao lado do arquivo).
+
 ### Sincronização das cópias
 
-As cópias de `index.html` e das imagens de cartão precisam estar igualadas em 4 lugares para que tudo funcione tanto na versão deployada quanto no preview local (abrir o arquivo direto do disco):
+`index.html`, `css/`, `js/` e as imagens de cartão precisam estar igualadas em 4 lugares para que tudo funcione tanto na versão deployada quanto no preview local (abrir o arquivo direto do disco):
 
-- `index.html` (raiz do repositório)
-- `public/index.html`
-- `/mnt/c/recargabus/index.html` e `/mnt/c/recargabus/public/index.html` (pasta de deploy no Windows)
+- `index.html` + `css/` + `js/` + `cards/` (raiz do repositório)
+- `public/index.html` + `public/css/` + `public/js/` + `public/cards/` (solicitado pelo Worker)
 
 ```
 cp index.html public/index.html
-cp index.html /mnt/c/recargabus/index.html
-cp index.html /mnt/c/recargabus/public/index.html
+cp -r css public/css
+cp -r js public/js
 cp public/cards/*.jpg cards/
-cp public/cards/*.jpg /mnt/c/recargabus/cards/
+
+cp index.html /mnt/c/recargabus/index.html
+cp -r css /mnt/c/recargabus/css
+cp -r js /mnt/c/recargabus/js
+cp -r public/index.html public/css public/js public/cards /mnt/c/recargabus/public/
 ```
 
 Confira com `md5sum` que as cópias ficam idênticas.
-
-> **Nota:** as imagens usam caminho **relativo** (`cards/*.jpg`), então funcionam tanto no site quanto abrindo o `index.html` localmente (desde que a pasta `cards/` esteja ao lado do arquivo).
 
 ## Como rodar
 
